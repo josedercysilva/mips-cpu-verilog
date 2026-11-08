@@ -3,8 +3,8 @@
 // Faculdade de Engenharia Elétrica e da Computação - FEEC
 // Disciplina: Arquitetura de Sistemas Digitais e Laboratório
 // Manaus, Amazonas, Brasil
-// Autor: José Dercy Vieira da Silva Filho <josedercysilva@gmail.com>
-// Desenvolvido com auxílio de: Google Antigravity (Google DeepMind) — Gemini 3.8 Flash
+// Autor: José Dercy Vieira da Silva Filho
+// Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
 // ----------------------------------------------------------------------------
 // Módulo: instr_mem — Memória de Instruções Parametrizada — ROM
 // Descrição: Armazena o código de máquina do programa a ser executado pelo

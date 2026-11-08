@@ -1,4 +1,11 @@
 // ============================================================================
+// Universidade Federal do Amazonas - UFAM
+// Faculdade de Engenharia Elétrica e da Computação - FEEC
+// Disciplina: Arquitetura de Sistemas Digitais e Laboratório
+// Manaus, Amazonas, Brasil
+// Autor: José Dercy Vieira da Silva Filho
+// Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
+// ----------------------------------------------------------------------------
 // Modulo: tb_control_unit — Testbench Unitario da Unidade de Controle
 // ============================================================================
 

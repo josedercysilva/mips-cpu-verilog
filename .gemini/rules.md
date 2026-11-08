@@ -1,6 +1,6 @@
 # Diretrizes e Regras do Projeto MIPS com Pipeline (Entrega 03)
 
-> **Autor das Regras e Mantenedor do Repositório (GitHub):** José Dercy Silva (<josedercysilva@gmail.com>) / [@josedercysilva](https://github.com/josedercysilva)
+> **Autor das Regras e Mantenedor do Repositório (GitHub):** José Dercy Silva ([@josedercysilva](https://github.com/josedercysilva))
 
 Este documento define o contexto operacional, convenções arquiteturais e restrições obrigatórias para o assistente **Antigravity** neste repositório.
 
@@ -9,8 +9,8 @@ Este documento define o contexto operacional, convenções arquiteturais e restr
 ## 1. Identificação do Projeto e Equipe
 - **Disciplina:** Arquitetura de Sistemas Digitais e Laboratório (UFAM)
 - **Professor:** Thiago Brito Bezerra
-- **Autor e Mantenedor:** José Dercy Silva (<josedercysilva@gmail.com>)
-- **Equipe:** José Dercy Vieira da Silva Filho, Vinicius Menezes.
+- **Autor das regras e Mantenedor:** José Dercy Vieira da Silva Filho ([@josedercysilva](https://github.com/josedercysilva))
+- **Equipe do Projeto:** José Dercy Vieira da Silva Filho e Vinicius Menezes.
 - **Plataforma Alvo:** FPGA Intel MAX 10 / Altera DE10-Lite (10M50DAF484C7G)
 - **Software de Síntese:** Intel Quartus Prime
 - **Simulação RTL:** Icarus Verilog (`iverilog`) e GTKWave (`scripts/run_simulation.sh`, `scripts/run_all_tests.sh`)
