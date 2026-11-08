@@ -21,6 +21,7 @@ module tb_datapath_aux;
 
     // Sinais PC
     reg  [DATA_WIDTH-1:0] pc_in;
+    reg                   pc_enable;
     wire [DATA_WIDTH-1:0] pc_out;
 
     // Sinais Adder
@@ -54,6 +55,7 @@ module tb_datapath_aux;
     pc #(.DATA_WIDTH(DATA_WIDTH)) uut_pc (
         .clk(clk),
         .reset(reset),
+        .enable(pc_enable),
         .pc_in(pc_in),
         .pc_out(pc_out)
     );
@@ -99,6 +101,7 @@ module tb_datapath_aux;
     initial begin
         clk = 0;
         reset = 1;
+        pc_enable = 1;
         pc_in = 32'h00000000;
         adder_a = 0; adder_b = 0;
         sign_ext_in = 0;
@@ -139,6 +142,40 @@ module tb_datapath_aux;
             errors = errors + 1;
         end else begin
             $display("[PASS PC] Segundo ciclo de clock validado: 0x%08h", pc_out);
+        end
+
+        // Teste de Stall do PC (enable = 0)
+        pc_enable = 0;
+        pc_in = 32'h0040000C; 
+        #10;
+        tests = tests + 1;
+        if (pc_out !== 32'h00400008) begin
+            $display("[ERRO PC] PC não congelou sob stall (enable=0)! Esperado: 0x00400008, Obtido: 0x%08h", pc_out);
+            errors = errors + 1;
+        end else begin
+            $display("[PASS PC] Congelamento sob comando (enable=0 / Stall) validado: 0x%08h", pc_out);
+        end
+
+        // Manter stall por mais um ciclo com endereço diferente
+        pc_in = 32'h00400010;
+        #10;
+        tests = tests + 1;
+        if (pc_out !== 32'h00400008) begin
+            $display("[ERRO PC] PC alterou valor durante múltiplos ciclos de stall! Obtido: 0x%08h", pc_out);
+            errors = errors + 1;
+        end else begin
+            $display("[PASS PC] Retenção em múltiplos ciclos de stall validada: 0x%08h", pc_out);
+        end
+
+        // Retomar avanço normal (enable = 1)
+        pc_enable = 1;
+        #10;
+        tests = tests + 1;
+        if (pc_out !== 32'h00400010) begin
+            $display("[ERRO PC] Retomada de avanço (enable=1) falhou! Esperado: 0x00400010, Obtido: 0x%08h", pc_out);
+            errors = errors + 1;
+        end else begin
+            $display("[PASS PC] Retomada do avanço com enable=1 pós-stall validada: 0x%08h", pc_out);
         end
 
         // --- 2. Teste do Adder ---
