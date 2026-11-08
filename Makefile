@@ -3,7 +3,7 @@ SHELL := /usr/bin/env bash
 QUARTUS_BIN_DIR ?= /home/jdercy/01-dev/programas/opt_intel/quartus/bin
 export PATH := $(QUARTUS_BIN_DIR):$(PATH)
 
-.PHONY: all help test alu datapath_aux reg_file control instr_mem data_mem top waves waves-alu waves-top relatorio apresentacao quartus quartus-build quartus-pgm clean
+.PHONY: all help test alu datapath_aux reg_file control instr_mem data_mem pipe_if_id top waves waves-alu waves-top relatorio apresentacao quartus quartus-build quartus-pgm clean
 
 all: top
 
@@ -44,6 +44,9 @@ instr_mem:
 
 data_mem:
 	@./scripts/run_simulation.sh data_mem
+
+pipe_if_id:
+	@./scripts/run_simulation.sh pipe_if_id
 
 top:
 	@./scripts/run_simulation.sh top
