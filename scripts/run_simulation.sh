@@ -13,7 +13,7 @@ TARGET="${1:-}"
 
 if [[ -z "${TARGET}" ]]; then
     echo -e "${RED}[ERRO]${RESET} Alvo de simulação não especificado."
-    echo "Uso: $0 <alu | reg_file | control_unit | instr_mem | data_mem | top>"
+    echo "Uso: $0 <alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | top>"
     exit 1
 fi
 
@@ -60,6 +60,10 @@ case "${TARGET}" in
         SRC_FILES=("src/memory/data_mem.v")
         TB_FILE="tb/tb_data_mem.v"
         ;;
+    pipe_if_id)
+        SRC_FILES=("src/pipeline/pipe_if_id.v")
+        TB_FILE="tb/tb_pipe_if_id.v"
+        ;;
     top|mips_monociclo_top)
         TARGET="mips_monociclo_top"
         OUT_VVP="${BUILD_DIR}/mips_monociclo_top.vvp"
@@ -99,6 +103,7 @@ iverilog -g2012 -Wall \
     -I "${ROOT_DIR}/src/datapath" \
     -I "${ROOT_DIR}/src/control" \
     -I "${ROOT_DIR}/src/memory" \
+    -I "${ROOT_DIR}/src/pipeline" \
     -o "${OUT_VVP}" \
     "${SRC_FILES[@]}" "${TB_FILE}"
 
