@@ -3,9 +3,8 @@
 // Faculdade de Engenharia Elétrica e da Computação - FEEC
 // Disciplina: Arquitetura de Sistemas Digitais e Laboratório
 // Manaus, Amazonas, Brasil
-// Autor: José Dercy Vieira da Silva Filho <josedercysilva@gmail.com>
+// Autor: José Dercy Vieira da Silva Filho
 // Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
-// Desenvolvido com auxílio de: Google Antigravity (Google DeepMind) — Gemini 3.8 Flash
 // ----------------------------------------------------------------------------
 // Módulo: pipe_if_id — Registrador de Pipeline IF/ID
 // Descrição: Registrador de barreira entre os estágios de Busca (IF) e

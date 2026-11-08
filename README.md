@@ -2,8 +2,8 @@
 
 > **Terceira Entrega** da disciplina de **Arquitetura de Sistemas Digitais e Laboratório**  
 > **Universidade Federal do Amazonas (UFAM)** — Faculdade de Engenharia Elétrica e da Computação (FEEC)  
-> **Autores:** José Dercy Vieira da Silva Filho e Vinicius Menezes  
-> **Mantenedor do Repositório:** José Dercy Silva ([@josedercysilva](https://github.com/josedercysilva))  
+> **Mantenedor:** José Dercy Vieira da Silva Filho ([@josedercysilva](https://github.com/josedercysilva))  
+> **Equipe do Projeto (UFAM):** José Dercy Vieira da Silva Filho e Vinicius Menezes  
 > **Plataforma Alvo:** FPGA Intel MAX 10 (`10M50DAF484C7G`) — Placa Terasic DE10-Lite  
 > **Prazo da Entrega:** 13/11/2026, até às 13:59h (Pontuação Total: 8,0 pontos)  
 
@@ -134,3 +134,13 @@ make relatorio
   * Distribuição global de relógio através de redes dedicadas `CLKCTRL`.
   * Ganho de frequência de operação ($F_{\max}$) em relação ao processador monociclo da Entrega 02 devido à redução do caminho crítico por estágio.
 * **Documentação Técnica IEEE:** Relatório detalhado no formato IEEEtran de 6 páginas em [`docs/relatorio/`](docs/relatorio/).
+
+---
+
+## Ambiente de Desenvolvimento e Ferramental
+
+* **Síntese Lógica e Mapeamento FPGA:** Intel Quartus Prime Lite Edition 20.1 (MAX 10 / DE10-Lite)
+* **Simulação Comportamental RTL:** Icarus Verilog (`iverilog`)
+* **Inspeção e Depuração de Formas de Onda:** GTKWave
+* **Documentação Científica e Tipografia:** LaTeX (`IEEEtran` / Tectonic) e Typst
+* **Ambiente de Engenharia e Pair Programming:** Google Antigravity (Google DeepMind)
