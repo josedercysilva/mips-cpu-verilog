@@ -52,6 +52,7 @@ Thumbs.db
 *.swo
 .vscode/
 .idea/
+.kateconfig
 
 # --- Scripts Python Temporários / Testes ---
 scripts/*.py
