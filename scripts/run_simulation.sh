@@ -13,7 +13,7 @@ TARGET="${1:-}"
 
 if [[ -z "${TARGET}" ]]; then
     echo -e "${RED}[ERRO]${RESET} Alvo de simulação não especificado."
-    echo "Uso: $0 <alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | top>"
+    echo "Uso: $0 <alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | pipe_id_ex | top>"
     exit 1
 fi
 
@@ -63,6 +63,10 @@ case "${TARGET}" in
     pipe_if_id)
         SRC_FILES=("src/pipeline/pipe_if_id.v")
         TB_FILE="tb/tb_pipe_if_id.v"
+        ;;
+    pipe_id_ex)
+        SRC_FILES=("src/pipeline/pipe_id_ex.v")
+        TB_FILE="tb/tb_pipe_id_ex.v"
         ;;
     top|mips_monociclo_top)
         TARGET="mips_monociclo_top"
