@@ -3,9 +3,9 @@ SHELL := /usr/bin/env bash
 QUARTUS_BIN_DIR ?= /home/jdercy/01-dev/programas/opt_intel/quartus/bin
 export PATH := $(QUARTUS_BIN_DIR):$(PATH)
 
-.PHONY: all help test alu datapath_aux reg_file control instr_mem data_mem pipe_if_id pipe_id_ex pipe_ex_mem pipe_mem_wb forwarding_unit hazard_detection_unit top waves waves-alu waves-top relatorio apresentacao quartus quartus-build quartus-pgm clean
+.PHONY: all help test alu datapath_aux reg_file control instr_mem data_mem pipe_if_id pipe_id_ex pipe_ex_mem pipe_mem_wb forwarding_unit hazard_detection_unit top pipeline_top waves waves-alu waves-top waves-pipeline relatorio apresentacao quartus quartus-build quartus-pgm clean
 
-all: top
+all: pipeline_top
 
 help:
 	@echo "Alvos disponíveis no Makefile:"
@@ -65,6 +65,9 @@ hazard_detection_unit:
 
 top:
 	@./scripts/run_simulation.sh top
+
+pipeline_top:
+	@./scripts/run_simulation.sh pipeline_top
 
 test:
 	@./scripts/run_all_tests.sh
