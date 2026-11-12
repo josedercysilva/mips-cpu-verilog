@@ -28,8 +28,12 @@ module instr_mem #(
     // Array de memória ROM
     reg [DATA_WIDTH-1:0] rom [0:MEM_DEPTH-1];
 
-    // Inicialização da ROM a partir de arquivo binário
+    // Inicialização da ROM: preenche com NOP (0x00000000) e carrega o arquivo binário
+    integer i;
     initial begin
+        for (i = 0; i < MEM_DEPTH; i = i + 1) begin
+            rom[i] = {DATA_WIDTH{1'b0}};
+        end
         $readmemb(INIT_FILE, rom);
     end
 
