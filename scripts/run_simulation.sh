@@ -13,7 +13,7 @@ TARGET="${1:-}"
 
 if [[ -z "${TARGET}" ]]; then
     echo -e "${RED}[ERRO]${RESET} Alvo de simulação não especificado."
-    echo "Uso: $0 <alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | pipe_id_ex | pipe_ex_mem | pipe_mem_wb | forwarding_unit | hazard_detection_unit | top | pipeline_top>"
+    echo "Uso: $0 <alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | pipe_id_ex | pipe_ex_mem | pipe_mem_wb | forwarding_unit | hazard_detection_unit | pipeline_top>"
     exit 1
 fi
 
@@ -83,28 +83,6 @@ case "${TARGET}" in
     hazard_detection_unit)
         SRC_FILES=("src/hazard/hazard_detection_unit.v")
         TB_FILE="tb/tb_hazard_detection_unit.v"
-        ;;
-    top|mips_monociclo_top)
-        TARGET="mips_monociclo_top"
-        OUT_VVP="${BUILD_DIR}/mips_monociclo_top.vvp"
-        SRC_FILES=(
-            "src/datapath/pc.v"
-            "src/datapath/adder.v"
-            "src/datapath/mux2to1.v"
-            "src/datapath/mux3to1.v"
-            "src/datapath/mux4to1.v"
-            "src/datapath/sign_extend.v"
-            "src/datapath/reg_file.v"
-            "src/datapath/alu.v"
-            "src/datapath/datapath.v"
-            "src/control/main_control.v"
-            "src/control/alu_control.v"
-            "src/control/control_unit.v"
-            "src/memory/instr_mem.v"
-            "src/memory/data_mem.v"
-            "src/mips_monociclo_top.v"
-        )
-        TB_FILE="tb/tb_mips_monociclo_top.v"
         ;;
     pipeline_top|mips_pipeline_top)
         TARGET="mips_pipeline_top"

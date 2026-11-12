@@ -25,5 +25,19 @@ if [[ -z "${VCD_FILE:-}" || ! -f "${VCD_FILE}" ]]; then
     exit 1
 fi
 
-echo -e "${BLUE}==>${RESET} Abrindo GTKWave com: ${VCD_FILE}"
-gtkwave "${VCD_FILE}" > /dev/null 2>&1 &
+GTKW_FILE=""
+TARGET_NAME="$(basename "${VCD_FILE}" .vcd)"
+if [[ -f "${ROOT_DIR}/scripts/${TARGET_NAME}.gtkw" ]]; then
+    GTKW_FILE="${ROOT_DIR}/scripts/${TARGET_NAME}.gtkw"
+elif [[ -f "${BUILD_DIR}/${TARGET_NAME}.gtkw" ]]; then
+    GTKW_FILE="${BUILD_DIR}/${TARGET_NAME}.gtkw"
+fi
+
+if [[ -n "${GTKW_FILE}" ]]; then
+    echo -e "${BLUE}==>${RESET} Abrindo GTKWave com forma de onda: ${VCD_FILE}"
+    echo -e "${BLUE}==>${RESET} Aplicando layout configurado: ${GTKW_FILE}"
+    gtkwave "${VCD_FILE}" "${GTKW_FILE}" > /dev/null 2>&1 &
+else
+    echo -e "${BLUE}==>${RESET} Abrindo GTKWave com: ${VCD_FILE}"
+    gtkwave "${VCD_FILE}" > /dev/null 2>&1 &
+fi
