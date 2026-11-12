@@ -74,7 +74,7 @@ module mips_monociclo_top #(
         .jr(jr_ctrl)
     );
 
-    datapath #(
+    datapath_monociclo #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH)
     ) datapath_inst (

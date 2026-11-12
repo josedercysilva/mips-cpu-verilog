@@ -6,12 +6,12 @@
 // Autor: José Dercy Vieira da Silva Filho
 // Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
 // ----------------------------------------------------------------------------
-// Módulo: datapath — Caminho de Dados Monociclo MIPS
+// Módulo: datapath_monociclo — Caminho de Dados Monociclo MIPS
 // ============================================================================
 
 `timescale 1ns / 1ps
 
-module datapath #(
+module datapath_monociclo #(
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 32
 ) (

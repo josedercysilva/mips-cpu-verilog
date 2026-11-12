@@ -24,7 +24,7 @@ module tb_mips_monociclo_top;
     always #5 clk = ~clk;
 
     initial begin
-        $dumpfile("build/top.vcd");
+        $dumpfile("monociclo/build/mips_monociclo_top.vcd");
         $dumpvars(0, tb_mips_monociclo_top);
 
         $display("==========================================================");
