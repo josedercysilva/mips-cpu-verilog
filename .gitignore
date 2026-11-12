@@ -15,6 +15,7 @@ quartus/db/
 quartus/incremental_db/
 quartus/output_files/
 quartus/simulation/
+quartus/assembly-mips/
 db/
 incremental_db/
 output_files/
