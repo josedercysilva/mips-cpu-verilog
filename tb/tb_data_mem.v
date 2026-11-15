@@ -43,6 +43,9 @@ module tb_data_mem;
     always #5 clk = ~clk;
     
     initial begin
+        $dumpfile("build/data_mem.vcd");
+        $dumpvars(0, tb_data_mem);
+
         clk = 0;
         mem_read = 0;
         mem_write = 0;

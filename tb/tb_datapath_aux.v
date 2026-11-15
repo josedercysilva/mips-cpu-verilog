@@ -99,6 +99,9 @@ module tb_datapath_aux;
     always #5 clk = ~clk;
 
     initial begin
+        $dumpfile("build/datapath_aux.vcd");
+        $dumpvars(0, tb_datapath_aux);
+
         clk = 0;
         reset = 1;
         pc_enable = 1;

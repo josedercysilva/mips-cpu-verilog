@@ -33,6 +33,9 @@ module tb_instr_mem;
     );
     
     initial begin
+        $dumpfile("build/instr_mem.vcd");
+        $dumpvars(0, tb_instr_mem);
+
         $display("==========================================================");
         $display("   Iniciando Testbench da Memória de Instruções (Fase 3)  ");
         $display("==========================================================");

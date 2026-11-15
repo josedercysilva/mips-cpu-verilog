@@ -51,6 +51,9 @@ module tb_reg_file;
     always #5 clk = ~clk;
     
     initial begin
+        $dumpfile("build/reg_file.vcd");
+        $dumpvars(0, tb_reg_file);
+
         // Inicialização
         clk = 0;
         reset = 1;
