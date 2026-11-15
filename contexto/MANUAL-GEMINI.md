@@ -45,7 +45,7 @@ Leia este guia antes de propor alterações, responder dúvidas ou editar códig
 .
 ├── AGENTS.md / GEMINI.md        -> Regras obrigatórias de engenharia (AGENTS / .gemini/rules.md)
 ├── Makefile                     -> Alvos: test, pipeline_top, waves-pipeline, quartus*, relatorio, clean
-├── assembly-mips/               -> Benchmark oficial (sort.s, sort-teste.s, sort.bin)
+├── assembly-mips/               -> Firmwares bare-metal (sort.s, sort.bin, teste_isa.s) e mars/
 ├── contexto/                    -> Especificação do Classroom, arquitetura real e este manual
 ├── docs/                        -> Relatório LaTeX (IEEEtran + Tectonic) e slides Beamer
 ├── formal_test/                 -> Verificação formal SVA (forwarding_unit e control_unit)
