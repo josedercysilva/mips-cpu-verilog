@@ -14,7 +14,8 @@ Este documento define o contexto operacional, convenções arquiteturais e restr
 - **Plataforma Alvo:** FPGA Intel MAX 10 / Altera DE10-Lite (10M50DAF484C7G)
 - **Software de Síntese:** Intel Quartus Prime
 - **Simulação RTL:** Icarus Verilog (`iverilog`) e GTKWave (`scripts/run_simulation.sh`, `scripts/run_all_tests.sh`)
-- **Prazo da Entrega 03:** 13/11/2026, até às 13:59h (Pontuação Total: 8,0 pontos)
+- **Prazo da Entrega 03:** 18/11/2026, até às 13:59h (Pontuação Total: 8,0 pontos)
+- **Onboarding de Contexto:** Leia `contexto/MANUAL-GEMINI.md`, `contexto/arquivo-original-classroom.md` e `contexto/arquitetura-pipeline-mips.md` antes de iniciar alterações.
 
 ---
 
@@ -25,17 +26,19 @@ Este documento define o contexto operacional, convenções arquiteturais e restr
    - **Caminho de Dados:** `src/datapath/` (ALU, Register File, Somadores, Multiplexadores parametrizados 2:1, 3:1, 4:1, Extensores de Sinal, Program Counter).
    - **Registradores de Pipeline:** `src/pipeline/` (`pipe_if_id.v`, `pipe_id_ex.v`, `pipe_ex_mem.v`, `pipe_mem_wb.v`) com sinais de habilitação (`enable` para stall) e reinicialização síncrona/assíncrona (`flush`/`rst`).
    - **Unidades de Resolução de Riscos (Hazards):** `src/hazard/` (`forwarding_unit.v` para adiantamentos de dados RAW; `hazard_detection_unit.v` para detecção de perigo Load-Use com geração de stalls/bolhas).
-   - **Unidade de Controle:** `src/control/` (Unidade de Controle Principal `main_control.v` e Controle da ALU `alu_control.v`).
+   - **Unidade de Controle:** `src/control/` (`main_control.v`, `alu_control.v` e `control_unit.v`).
    - **Memória:** `src/memory/` (Memória de Instruções ROM `instr_mem.v` e Memória de Dados RAM `data_mem.v`).
    - **Top-Level:** `src/mips_pipeline_top.v` integrando os 5 estágios (IF, ID, EX, MEM, WB).
+   - **Baseline Legado:** `monociclo/` (MIPS Monociclo da Entrega 02 isolado para comparação de desempenho).
 3. **Tratamento Rigoroso de Perigos (Hazards):**
    - **Riscos de Dados (RAW):** Resolvidos via *Forwarding Unit*, encaminhando resultados dos estágios EX/MEM e MEM/WB diretamente para as entradas da ULA sem paradas desnecessárias de pipeline.
    - **Risco Load-Use:** Resolvido pela *Hazard Detection Unit*, inserindo 1 ciclo de bolha (stall em `PC` e `IF/ID`, e zeramento dos sinais de controle em `ID/EX`).
    - **Riscos de Controle (Branches e Jumps):** Descarte correto de instruções especulativas através de pulsos de `flush` nos registradores de pipeline.
-4. **Instruções Obrigatórias do Caminho de Dados:**
-   - Tipo R: `add`, `sub`, `and`, `or`, `slt`, `xor`, `nor`, `jr`.
-   - Tipo I: `lw`, `sw`, `addi`, `andi`, `ori`, `slti`, `beq`, `bne`.
+4. **Instruções Suportadas pelo Caminho de Dados (16 Instruções):**
+   - Tipo R: `add`, `sub`, `and`, `or`, `slt`, `nor`, `sll`, `jr`.
+   - Tipo I: `lw`, `sw`, `addi`, `slti`, `beq`, `bne`.
    - Tipo J: `j`, `jal`.
+   *(Não adicionar instruções fora dessa lista sem solicitação explícita do usuário; o benchmark oficial da disciplina usa apenas esse conjunto.)*
 5. **Testbenches Individuais e Top-Level (Rubrica 2):**
    - Todo componente deve ter seu testbench unitário em `tb/` (ex.: `tb_pipe_if_id.v`, `tb_forwarding_unit.v`, `tb_hazard_detection_unit.v`, `tb_mips_pipeline_top.v`).
    - Todos os testes devem compilar e executar via Icarus Verilog gerando formas de onda `.vcd` para validação no GTKWave.
@@ -70,6 +73,8 @@ Para conformidade estrita com o roteiro da disciplina e o código C/Assembly ofi
 ---
 
 ## 6. Fluxo de Trabalho, Versionamento e Git
+- **Proibição de Comandos Git sem Autorização Expressa:** **NÃO execute nenhum comando `git`** (incluindo `status`, `diff`, `log`, `add`, `commit`, `checkout`, `switch`, `branch`, `merge`, `rebase`, `reset`, `restore`, `clean`, `push`, etc.) **sem autorização expressa do usuário**, ainda que operando em modo de autonomia total.
+  - **Motivo:** o usuário utiliza o Git manualmente junto ao Antigravity como ferramenta principal para depurar, revisar diffs e acompanhar todas as alterações.
 - **Gestão do Repositório (José Dercy):**
   - **Branch Protection:** Proibido push direto na branch `main`. Todo desenvolvimento deve ocorrer em branches de funcionalidade e ser integrado via Pull Request (PR).
   - **Contratos de Interface (Skeletons):** O desenvolvimento de qualquer módulo inicia pela definição das portas (`input`, `output`) e parâmetros (`DATA_WIDTH`, etc.) antes da implementação da lógica interna.

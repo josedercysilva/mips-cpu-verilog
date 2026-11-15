@@ -14,6 +14,7 @@ find "${ROOT_DIR}" -maxdepth 2 -type f \( -name "*.vvp" -o -name "*.vcd" -o -nam
 
 echo -e "${BLUE}==>${RESET} Limpando diretórios e lixos do Intel Quartus Prime..."
 rm -rf "${ROOT_DIR}/quartus/db" "${ROOT_DIR}/quartus/incremental_db" "${ROOT_DIR}/quartus/output_files" "${ROOT_DIR}/quartus/assembly-mips"
-find "${ROOT_DIR}/quartus" -type f \( -name "*.qws" -o -name "*.rpt" -o -name "*.smsg" -o -name "*.summary" -o -name "*.jdi" -o -name "*.pin" -o -name "*.sld" \) -exec rm -f {} + 2>/dev/null || true
+rm -rf "${ROOT_DIR}/monociclo/quartus/db" "${ROOT_DIR}/monociclo/quartus/incremental_db" "${ROOT_DIR}/monociclo/quartus/output_files" "${ROOT_DIR}/monociclo/quartus/assembly-mips"
+find "${ROOT_DIR}/quartus" "${ROOT_DIR}/monociclo/quartus" -type f \( -name "*.qws" -o -name "*.rpt" -o -name "*.smsg" -o -name "*.summary" -o -name "*.jdi" -o -name "*.pin" -o -name "*.sld" \) -exec rm -f {} + 2>/dev/null || true
 
 echo -e "${GREEN}[OK]${RESET} Ambiente limpo com sucesso."

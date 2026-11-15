@@ -11,7 +11,7 @@ YELLOW="\033[0;33m"
 BOLD="\033[1m"
 RESET="\033[0m"
 
-MODULES=("alu" "datapath_aux" "reg_file" "control_unit" "instr_mem" "data_mem" "pipe_if_id" "pipe_id_ex" "pipe_ex_mem" "pipe_mem_wb" "forwarding_unit" "hazard_detection_unit" "pipeline_top")
+MODULES=("alu" "datapath_aux" "reg_file" "control_unit" "instr_mem" "data_mem" "pipe_if_id" "pipe_id_ex" "pipe_ex_mem" "pipe_mem_wb" "forwarding_unit" "hazard_detection_unit" "pipeline_top" "pipeline_isa_hazards")
 PASSED=0
 FAILED=0
 declare -a FAILED_MODULES=()

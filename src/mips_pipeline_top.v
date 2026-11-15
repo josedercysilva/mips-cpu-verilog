@@ -17,7 +17,8 @@
 module mips_pipeline_top #(
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 32,
-    parameter MEM_DEPTH  = 256
+    parameter MEM_DEPTH  = 256,
+    parameter INIT_FILE  = "assembly-mips/sort.bin"
 ) (
     input  wire                  clk,
     input  wire                  reset,
@@ -61,7 +62,8 @@ module mips_pipeline_top #(
     instr_mem #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH),
-        .MEM_DEPTH(MEM_DEPTH)
+        .MEM_DEPTH(MEM_DEPTH),
+        .INIT_FILE(INIT_FILE)
     ) instr_mem_inst (
         .addr(if_pc),
         .instr(if_instr)
@@ -280,6 +282,8 @@ module mips_pipeline_top #(
     wire                  mem_reg_write;
     wire [4:0]            mem_write_reg;
     wire [DATA_WIDTH-1:0] mem_alu_result;
+    wire [1:0]            mem_mem_to_reg;
+    wire [ADDR_WIDTH-1:0] mem_pc_plus_4;
     wire [1:0]            forward_a;
     wire [1:0]            forward_b;
 
@@ -297,11 +301,14 @@ module mips_pipeline_top #(
         .forward_b(forward_b)
     );
 
+    // Dado encaminhado do estagio EX/MEM (usa PC+4 quando a instrucao for JAL)
+    wire [DATA_WIDTH-1:0] mem_forward_data = (mem_mem_to_reg == 2'b10) ? mem_pc_plus_4 : mem_alu_result;
+
     // Multiplexador de Forwarding A
     reg [DATA_WIDTH-1:0] ex_forward_a_data;
     always @(*) begin
         case (forward_a)
-            2'b10:   ex_forward_a_data = mem_alu_result;
+            2'b10:   ex_forward_a_data = mem_forward_data;
             2'b01:   ex_forward_a_data = wb_write_data;
             default: ex_forward_a_data = ex_read_data1;
         endcase
@@ -311,7 +318,7 @@ module mips_pipeline_top #(
     reg [DATA_WIDTH-1:0] ex_forward_b_data;
     always @(*) begin
         case (forward_b)
-            2'b10:   ex_forward_b_data = mem_alu_result;
+            2'b10:   ex_forward_b_data = mem_forward_data;
             2'b01:   ex_forward_b_data = wb_write_data;
             default: ex_forward_b_data = ex_read_data2;
         endcase
@@ -381,8 +388,6 @@ module mips_pipeline_top #(
     wire                  mem_bne;
     wire                  mem_mem_read;
     wire                  mem_mem_write;
-    wire [1:0]            mem_mem_to_reg;
-    wire [ADDR_WIDTH-1:0] mem_pc_plus_4;
     wire [ADDR_WIDTH-1:0] mem_branch_target;
     wire                  mem_zero;
     wire [DATA_WIDTH-1:0] mem_write_data;
@@ -493,7 +498,7 @@ module mips_pipeline_top #(
     // ========================================================================
     // CONTROLE DE FLUXO: ESVAZIAMENTO (FLUSH) E PRÓXIMO PC
     // ========================================================================
-    assign if_id_flush = ex_branch_taken | ex_jr;
+    assign if_id_flush = ex_branch_taken | ex_jr | id_jump_taken;
     assign id_ex_flush = ex_branch_taken | ex_jr;
 
     always @(*) begin

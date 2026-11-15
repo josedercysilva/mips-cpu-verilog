@@ -27,12 +27,9 @@ module data_mem #(
     output wire [DATA_WIDTH-1:0] read_data
 );
 
-    // Array de memória RAM
     reg [DATA_WIDTH-1:0] ram [0:MEM_DEPTH-1];
 
-    // Leitura assíncrona combinacional
-    // Opcionalmente protegida por mem_read para evitar leituras indevidas
-    // Vetor inicial a ser ordenado
+
     initial begin
         ram[0] = 32'd88;
         ram[1] = 32'd15;
@@ -41,8 +38,7 @@ module data_mem #(
         ram[4] = 32'd99;
     end
 
-    // Usamos addr[9:2] para evitar estouro de limite (out-of-bounds) caso
-    // o código assembly grave em endereços do topo da memória (ex: stack)
+
     assign read_data = mem_read ? ram[addr[9:2]] : {DATA_WIDTH{1'b0}};
 
     // Escrita síncrona
