@@ -18,6 +18,7 @@ module tb_alu;
 
     reg  [DATA_WIDTH-1:0]     src_a;
     reg  [DATA_WIDTH-1:0]     src_b;
+    reg  [4:0]                shamt;
     reg  [ALU_CTRL_WIDTH-1:0] alu_ctrl;
     wire [DATA_WIDTH-1:0]     alu_result;
     wire                      zero;
@@ -31,6 +32,7 @@ module tb_alu;
     ) uut (
         .src_a(src_a),
         .src_b(src_b),
+        .shamt(shamt),
         .alu_ctrl(alu_ctrl),
         .alu_result(alu_result),
         .zero(zero)
@@ -61,6 +63,7 @@ module tb_alu;
         $display("   Iniciando Bateria de Testes Unitarios da ALU   ");
         $display("==================================================");
 
+        shamt = 5'd0;
         src_a = 32'h00FF00FF;
         src_b = 32'h0F0F0F0F;
         alu_ctrl = 4'b0000;
@@ -126,6 +129,28 @@ module tb_alu;
         alu_ctrl = 4'b1100;
         #10;
         check_result(32'hFFFFFFFF, 1'b0, "NOR");
+
+        src_a = 32'd0;
+        src_b = 32'd1;
+        shamt = 5'd2;
+        alu_ctrl = 4'b0011;
+        #10;
+        check_result(32'd4, 1'b0, "SLL (1 << 2)");
+
+        src_a = 32'd0;
+        src_b = 32'h0000000A;
+        shamt = 5'd4;
+        alu_ctrl = 4'b0011;
+        #10;
+        check_result(32'h000000A0, 1'b0, "SLL (0xA << 4)");
+
+        src_a = 32'd0;
+        src_b = 32'h80000000;
+        shamt = 5'd1;
+        alu_ctrl = 4'b0011;
+        #10;
+        check_result(32'h00000000, 1'b1, "SLL zero flag");
+        shamt = 5'd0;
 
         $display("==================================================");
         if (errors == 0) begin

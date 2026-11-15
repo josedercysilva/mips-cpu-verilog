@@ -17,7 +17,8 @@
 module mips_pipeline_top #(
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 32,
-    parameter MEM_DEPTH  = 256
+    parameter MEM_DEPTH  = 256,
+    parameter INIT_FILE  = "assembly-mips/sort.bin"
 ) (
     input  wire                  clk,
     input  wire                  reset,
@@ -61,7 +62,8 @@ module mips_pipeline_top #(
     instr_mem #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH),
-        .MEM_DEPTH(MEM_DEPTH)
+        .MEM_DEPTH(MEM_DEPTH),
+        .INIT_FILE(INIT_FILE)
     ) instr_mem_inst (
         .addr(if_pc),
         .instr(if_instr)

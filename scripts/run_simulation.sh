@@ -10,10 +10,11 @@ BLUE="\033[0;34m"
 RESET="\033[0m"
 
 TARGET="${1:-}"
+VALID_TARGETS="alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | pipe_id_ex | pipe_ex_mem | pipe_mem_wb | forwarding_unit | hazard_detection_unit | pipeline_top | pipeline_isa_hazards"
 
 if [[ -z "${TARGET}" ]]; then
     echo -e "${RED}[ERRO]${RESET} Alvo de simulação não especificado."
-    echo "Uso: $0 <alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | pipe_id_ex | pipe_ex_mem | pipe_mem_wb | forwarding_unit | hazard_detection_unit | pipeline_top>"
+    echo "Uso: $0 <${VALID_TARGETS}>"
     exit 1
 fi
 
@@ -84,9 +85,7 @@ case "${TARGET}" in
         SRC_FILES=("src/hazard/hazard_detection_unit.v")
         TB_FILE="tb/tb_hazard_detection_unit.v"
         ;;
-    pipeline_top|mips_pipeline_top)
-        TARGET="mips_pipeline_top"
-        OUT_VVP="${BUILD_DIR}/mips_pipeline_top.vvp"
+    pipeline_top|mips_pipeline_top|pipeline_isa_hazards)
         SRC_FILES=(
             "src/datapath/pc.v"
             "src/datapath/adder.v"
@@ -109,11 +108,17 @@ case "${TARGET}" in
             "src/hazard/hazard_detection_unit.v"
             "src/mips_pipeline_top.v"
         )
-        TB_FILE="tb/tb_mips_pipeline_top.v"
+        if [[ "${TARGET}" == "pipeline_isa_hazards" ]]; then
+            TB_FILE="tb/tb_pipeline_isa_hazards.v"
+        else
+            TARGET="mips_pipeline_top"
+            OUT_VVP="${BUILD_DIR}/mips_pipeline_top.vvp"
+            TB_FILE="tb/tb_mips_pipeline_top.v"
+        fi
         ;;
     *)
         echo -e "${RED}[ERRO]${RESET} Alvo '${TARGET}' desconhecido."
-        echo "Opções válidas: alu, reg_file, control_unit, instr_mem, data_mem, top"
+        echo "Opções válidas: ${VALID_TARGETS}"
         exit 1
         ;;
 esac

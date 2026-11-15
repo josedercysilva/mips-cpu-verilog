@@ -3,7 +3,7 @@ SHELL := /usr/bin/env bash
 QUARTUS_BIN_DIR ?= /home/jdercy/01-dev/programas/opt_intel/quartus/bin
 export PATH := $(QUARTUS_BIN_DIR):$(PATH)
 
-.PHONY: all help test alu datapath_aux reg_file control instr_mem data_mem pipe_if_id pipe_id_ex pipe_ex_mem pipe_mem_wb forwarding_unit hazard_detection_unit pipeline_top waves waves-alu waves-pipeline relatorio apresentacao quartus quartus-build quartus-pgm clean
+.PHONY: all help test alu datapath_aux reg_file control instr_mem data_mem pipe_if_id pipe_id_ex pipe_ex_mem pipe_mem_wb forwarding_unit hazard_detection_unit pipeline_top pipeline_isa_hazards waves waves-alu waves-pipeline relatorio apresentacao quartus quartus-build quartus-pgm clean
 
 all: pipeline_top
 
@@ -21,7 +21,8 @@ help:
 	@echo "  make pipe_mem_wb   - Executa o testbench do Registrador MEM/WB"
 	@echo "  make forwarding_unit - Executa o testbench da Forwarding Unit"
 	@echo "  make hazard_detection_unit - Executa o testbench da Hazard Detection Unit"
-	@echo "  make pipeline_top  - Executa a simulação do MIPS Pipeline Top-Level"
+	@echo "  make pipeline_top  - Executa a simulação do MIPS Pipeline Top-Level (Bubble Sort)"
+	@echo "  make pipeline_isa_hazards - Executa a suíte integrada teste_isa.bin + teste_hazards.bin"
 	@echo "  make test          - Executa toda a bateria de testes de regressão do Pipeline"
 	@echo "  make quartus       - Executa Análise e Elaboração rápida no Intel Quartus Prime"
 	@echo "  make quartus-build - Compilação Completa (Síntese + Fitter + Geração do Bitstream .sof)"
@@ -71,6 +72,9 @@ hazard_detection_unit:
 
 pipeline_top:
 	@./scripts/run_simulation.sh pipeline_top
+
+pipeline_isa_hazards:
+	@./scripts/run_simulation.sh pipeline_isa_hazards
 
 test:
 	@./scripts/run_all_tests.sh
