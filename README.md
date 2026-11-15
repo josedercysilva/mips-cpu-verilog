@@ -51,10 +51,11 @@ A validação funcional ponta a ponta é executada em regime *bare-metal* sobre 
 
 - [x] **Base (`monociclo/`):** Processador MIPS Monociclo completo (Entrega 02), preservado isoladamente como baseline de comparação.
 - [x] **RTL Completo (`src/`):** Caminho de dados parametrizado, unidade de controle, memórias ROM/RAM, 4 registradores de pipeline, `forwarding_unit`, `hazard_detection_unit` e integração [`mips_pipeline_top.v`](src/mips_pipeline_top.v).
-- [x] **Validação Unitária e Top-Level (`tb/`):** Todas as **14 bancadas** aprovadas em `make test` (`0` warnings de compilação) com geração de `.vcd` em `build/`, incluindo Bubble Sort (`sort.bin` em **205 ciclos**), `teste_isa.bin` e `teste_hazards.bin` (`tb_pipeline_isa_hazards.v`).
+- [x] **Validação Unitária e Top-Level (`tb/`):** Todas as **14 bancadas** aprovadas em `make test` (`0` warnings de compilação) com geração de `.vcd` em `build/`, além do comparativo automatizado `make benchmark` (`tb_benchmark_comparativo.v`) executando `sort.bin`, `teste_isa.bin` e `teste_hazards.bin` lado a lado contra o Monociclo.
 - [x] **Programas Assembly e Espelhos MARS (`assembly-mips/`):** `sort.s/.bin`, `teste_isa.s/.bin`, `teste_hazards.s/.bin` e espelhos com `syscall` em [`assembly-mips/mars/`](assembly-mips/mars/).
 - [x] **Cobertura de Testbenches (`tb/`):** Cobertura explícita das 16 instruções (`SLL`/`BNE`/`SLTI`), zero warnings em `tb_alu.v` e suíte integrada contínua de `teste_isa.bin`/`teste_hazards.bin`.
-- [ ] **Síntese Física, Relatório IEEE e Apresentação:** Compilação Quartus na DE10-Lite (`MAX 10`), relatório técnico IEEE (`docs/relatorio/`), slides (`docs/apresentacao/`) e vídeo demonstrativo (~10 min).
+- [x] **Síntese Física e Análise Temporal (`quartus/`, `monociclo/quartus/`):** Compilação completa na DE10-Lite (`MAX 10 10M50DAF484C7G`) via `make quartus-metrics`, atingindo **$58{,}25\text{ MHz}$** (`12.424` LEs, Setup Slack `+2,833 ns` em 50 MHz, `0` latches reais) contra **$45{,}31\text{ MHz}$** (`13.093` LEs) no Monociclo.
+- [ ] **Relatório IEEE, Slides e Vídeo:** Artigo técnico `IEEEtran` da Entrega 03 ([`docs/relatorio/`](docs/relatorio/)), atualização dos slides ([`docs/apresentacao/`](docs/apresentacao/)) e vídeo demonstrativo (~10 min no YouTube).
 
 ---
 
@@ -63,7 +64,7 @@ A validação funcional ponta a ponta é executada em regime *bare-metal* sobre 
 ```text
 .
 ├── AGENTS.md / GEMINI.md        # Diretrizes operacionais e regras de arquitetura/testes
-├── Makefile                     # Orquestrador de testes, simulação, GTKWave, Quartus e LaTeX
+├── Makefile                     # Orquestrador de testes, benchmark, GTKWave, Quartus e LaTeX
 ├── assembly-mips/               # Firmwares bare-metal (.s/.bin) e espelhos visuais em mars/
 ├── contexto/                    # Especificação oficial (Classroom), arquitetura e manual do projeto
 ├── docs/                        # Documentação técnica e científica
@@ -71,9 +72,8 @@ A validação funcional ponta a ponta é executada em regime *bare-metal* sobre 
 │   └── relatorio/               # Artigo técnico IEEEtran (base Entrega 02 e Entrega 03)
 ├── formal_test/                 # Verificação formal SVA (forwarding_unit e controle top-level)
 ├── monociclo/                   # Baseline MIPS Monociclo isolado (Entrega 02)
-├── notas/                       # Checklist de entregas, mapa da ISA e notas de estudo/relatório
 ├── quartus/                     # Projeto Intel Quartus Prime para FPGA MAX 10 (DE10-Lite)
-├── scripts/                     # Scripts bash para Icarus Verilog, GTKWave e suíte completa
+├── scripts/                     # Scripts bash/Python para Icarus Verilog, GTKWave, Quartus e suíte completa
 ├── src/                         # Código-fonte Verilog HDL (IEEE Std 1364-2005)
 │   ├── control/                 # main_control.v, alu_control.v e control_unit.v
 │   ├── datapath/                # pc.v, alu.v, reg_file.v, adder.v, sign_extend.v e mux*
@@ -81,14 +81,14 @@ A validação funcional ponta a ponta é executada em regime *bare-metal* sobre 
 │   ├── memory/                  # Subsistema Harvard (instr_mem.v ROM e data_mem.v RAM)
 │   ├── pipeline/                # pipe_if_id.v, pipe_id_ex.v, pipe_ex_mem.v e pipe_mem_wb.v
 │   └── mips_pipeline_top.v      # Top-Level do Processador MIPS Pipeline de 5 estágios
-└── tb/                          # 14 bancadas de teste unitárias e Top-Level (geram build/*.vcd)
+└── tb/                          # 15 bancadas de teste (14 de regressão + tb_benchmark_comparativo.v)
 ```
 
 ---
 
 ## Repertório de Instruções (16 Instruções Suportadas)
 
-O processador suporta exatamente as **16 instruções** exigidas pela especificação oficial da disciplina (documentadas em [`notas/zz-conjunto-instrucoes-suportadas.md`](notas/zz-conjunto-instrucoes-suportadas.md)):
+O processador suporta exatamente as **16 instruções** exigidas pela especificação oficial da disciplina (documentadas em [`contexto/arquitetura-pipeline-mips.md`](contexto/arquitetura-pipeline-mips.md)):
 
 | Formato | Instruções | Função na Arquitetura |
 | :---: | :--- | :--- |
@@ -128,16 +128,22 @@ make pipeline_top
 # Simula a suíte integrada teste_isa.bin + teste_hazards.bin no mips_pipeline_top
 make pipeline_isa_hazards
 
+# Benchmark comparativo Monociclo vs. Pipeline (salva build/benchmark_metrics.{md,csv,tex})
+make benchmark
+
 # Abre a última simulação do Pipeline no GTKWave
 make waves-pipeline
 
 # Executa o baseline Monociclo da Entrega 02 para comparação
 make -C monociclo run
 
-# Análise/elaboração rápida e compilação completa no Intel Quartus Prime (DE10-Lite)
-make quartus
-make quartus-build
-make quartus-pgm
+# Síntese física e análise temporal no Intel Quartus Prime (DE10-Lite / MAX 10)
+make quartus                  # Analysis & Elaboration rápida do Pipeline
+make quartus-build            # Fluxo completo do Pipeline (map -> fit -> asm -> sta)
+make quartus-build-monociclo  # Fluxo completo do Monociclo (map -> fit -> asm -> sta)
+make quartus-sta              # Timing Analyzer do Pipeline (Fmax / Slack)
+make quartus-metrics          # Sintetiza o que estiver pendente e gera comparativo (.md/.tex)
+make quartus-pgm              # Grava bitstream .sof na DE10-Lite via USB-Blaster
 
 # Compila o relatório técnico IEEE em PDF (Tectonic) e slides
 make relatorio
@@ -149,12 +155,34 @@ make clean
 
 ---
 
-## Validação Atual e Baseline Comparativo
+## Validação Atual e Comparativo (Pipeline vs. Monociclo)
 
 * **Suíte RTL Automatizada (Icarus Verilog):** **14 de 14 bancadas aprovadas (0 falhas, 0 warnings de compilação)** via `make test` ([`scripts/run_all_tests.sh`](scripts/run_all_tests.sh)), todas gerando formas de onda `.vcd` em `build/`.
-* **Benchmark Oficial no Pipeline (`sort.bin`):** Ordenação *bare-metal* de `[88, 15, 42, 7, 99]` $\to$ `[7, 15, 42, 88, 99]` concluída em **205 ciclos** (`11` stalls *Load-Use*, `22` flushes, `42+18` forwardings em A e `19+12` em B).
-* **Estresse ISA e Hazards (`teste_isa.bin` e `teste_hazards.bin`):** Validados por equivalência entre o simulador MARS 4.5 e a simulação RTL no `mips_pipeline_top`, cobrindo as 16 instruções, proteção de `$zero`, *Load-Use* (`lw->addi/add/sw/jr`), *flushes* sem `nop` e recursão dupla com `fib(7) = 13`.
-* **Baseline Monociclo (`monociclo/`):** Síntese validada na FPGA Intel MAX 10 (`10M50DAF484C7G`) com **17.089 LEs** e **0 latches transparentes espúrios** (relatório anterior em [`docs/relatorio/relatorio_segunda_entrega.pdf`](docs/relatorio/relatorio_segunda_entrega.pdf)).
+* **Validação Funcional Completa (`sort.bin`, `teste_isa.bin` e `teste_hazards.bin`):** 100% equivalente entre MARS 4.5, Monociclo e Pipeline, cobrindo as 16 instruções, proteção de `$zero`, *Load-Use* (`lw -> addi/add/sw/jr`), *flushes* sem `nop` e recursão dupla (`fib(7) = 13`).
+
+### Síntese Física na FPGA Intel MAX 10 (`10M50DAF484C7G`)
+
+Métricas obtidas via `make quartus-metrics` ([`scripts/quartus_metrics.py`](scripts/quartus_metrics.py)) com restrição de clock de $50{,}00\text{ MHz}$ (`20.000 ns`):
+
+| Métrica | Monociclo (Baseline) | Pipeline (5 Estágios) | Comparativo |
+| :--- | :---: | :---: | :---: |
+| **Logic Elements (LEs)** | `13,093 / 49,760` (`26%`) | `12,424 / 49,760` (`25%`) | `-669` LEs (`-5.1%`) |
+| **Funções Combinacionais** | `7,926 / 49,760` (`16%`) | `8,312 / 49,760` (`17%`) | `+386` LUTs |
+| **Registradores Dedicados** | `9,217 / 49,760` (`19%`) | `9,614 / 49,760` (`19%`) | `+397` regs |
+| **$F_{\max}$ (Slow 1200mV 85C)** | `45.31 MHz` (`22.07 ns`) | **`58.25 MHz`** (`17.17 ns`) | **`1.29x` mais rápido** |
+| **Setup Slack (`clk` @ 50 MHz)** | `-2.070 ns` *(não fecha)* | **`+2.833 ns`** *(cumpre)* | Margem positiva |
+| **Latches espúrios inferidos** | `0` reais (`+1` aviso `10240`) | `0` reais (`+1` aviso `10240`) | Limpo |
+
+### Desempenho RTL (`make benchmark`)
+
+Tempos reais calculados sobre $T_{\min}$ do Quartus ($22{,}07\text{ ns}$ para o Monociclo e $17{,}17\text{ ns}$ para o Pipeline):
+
+| Firmware (`assembly-mips/`) | Mono (ciclos / tempo) | Pipeline (ciclos / tempo) | CPI / IPC | Speedup (`Fmax`) | Desperdício (`stalls` + `flushes`) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `sort.bin` *(RAM ordenada)* | `155` / `3420.8 ns` | `195` / `3348.2 ns` | `1.26` / `0.79` | **`1.022x`** | `39` slots (`20.0%`) |
+| `sort.bin` *(fim `jr $ra -> 0`)* | `187` / `4127.1 ns` | `238` / `4086.5 ns` | `1.27` / `0.79` | **`1.010x`** | `51` slots (`21.4%`) |
+| `teste_isa.bin` *(16 instr.)* | `40` / `882.8 ns` | `50` / `858.5 ns` | `1.25` / `0.80` | **`1.028x`** | `9` slots (`18.0%`) |
+| `teste_hazards.bin` *(`fib(7)`)* | `495` / `10924.6 ns` | `721` / `12379.6 ns` | `1.46` / `0.69` | `0.882x` | `225` slots (`31.2%`) |
 
 ---
 
