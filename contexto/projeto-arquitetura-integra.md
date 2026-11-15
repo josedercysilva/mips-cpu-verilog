@@ -45,7 +45,7 @@ O progresso do projeto será acompanhado através de apresentação e relatório
 
 * **Primeira apresentação:** 11 de setembro de 2026;
 * **Segunda apresentação:** 9 de outubro de 2026;
-* **Terceira apresentação:** 13 de novembro de 2026;
+* **Terceira apresentação:** 18 de novembro de 2026;
 * **Quarta apresentação:** 11 de dezembro de 2026;
 
 Após esta data será descontado 2 pontos por dia de atraso. O projeto pode ser desenvolvido e entregue em equipe de 3 integrantes.

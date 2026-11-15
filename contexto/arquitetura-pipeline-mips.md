@@ -1,122 +1,92 @@
-# Arquitetura e Especificação Técnica: MIPS 5 Estágios com Pipeline
+# Arquitetura Implementada: Processador MIPS Pipeline de 5 Estágios
 
-Este documento estabelece o modelo arquitetural detalhado para o processador MIPS com pipeline de 5 estágios a ser desenvolvido para a **Terceira Avaliação Parcial** da disciplina de **Arquitetura de Sistemas Digitais e Laboratório (UFAM)**.
-
----
-
-## 1. Visão Geral da Arquitetura Pipeline
-
-O processador MIPS Pipeline divide a execução de instruções em 5 estágios síncronos clássicos (baseado em Patterson & Hennessy, *Computer Organization and Design*):
-
-1. **IF (Instruction Fetch - Busca da Instrução):**
-   - Leitura da instrução da memória de instruções (`instr_mem`) no endereço apontado por `PC`.
-   - Cálculo sequencial do próximo endereço: `PC_plus_4 = PC + 4`.
-   - Seleção do próximo PC via multiplexador (sequencial, desvio tomado ou salto).
-   - Suporte a sinal `PC_Write` para controle de bolhas/stalls.
-
-2. **ID (Instruction Decode / Register Read - Decodificação e Leitura de Registradores):**
-   - Decodificação dos campos da instrução: `opcode` [31:26], `rs` [25:21], `rt` [20:16], `rd` [15:11], `shamt` [10:6], `funct` [5:0].
-   - Leitura simultânea dos dois operandos no banco de registradores (`reg_file`).
-   - Extensão de sinal do campo imediato de 16 bits para 32 bits (`sign_extend`).
-   - Unidade de Controle Principal (`main_control`) gerando sinais para os estágios seguintes.
-   - Detecção de perigos (*Hazard Detection Unit*) operando neste estágio.
-
-3. **EX (Execute / Address Calculation - Execução e Cálculo de Endereços):**
-   - Operações aritméticas e lógicas na ULA (`alu`).
-   - Controle da ULA (`alu_control`) a partir de `ALUOp` e campo `funct`.
-   - Multiplexadores de adiantamento (*Forwarding Muxes*) para selecionar entre operando do banco ou valores adiantados de `EX/MEM` e `MEM/WB`.
-   - Multiplexador para selecionar entre dado de registrador ou imediato estendido (`ALUSrc`).
-   - Cálculo do endereço de destino para instruções de desvio (`PC_branch = PC_plus_4 + (imm << 2)`).
-   - Seleção do registrador de destino (`RegDst`: entre `rt` e `rd`, ou `$31` no caso de `jal`).
-
-4. **MEM (Memory Access - Acesso à Memória de Dados):**
-   - Escrita na memória de dados (`data_mem`) em instruções `sw`.
-   - Leitura da memória de dados em instruções `lw`.
-   - Resolução final de desvios condicionais (`Branch` e `Zero`), gerando sinal `PCSrc` e sinal de `Flush` (caso o desvio não seja adiantado para o estágio ID).
-
-5. **WB (Write Back - Escrita no Banco de Registradores):**
-   - Seleção do dado final a ser gravado no banco de registradores através de `MemtoReg`:
-     - Dado vindo da memória (`ReadData`).
-     - Resultado vindo da ULA (`ALUResult`).
-     - Endereço de retorno `PC+4` (para `jal`).
-   - Gravação síncrona no registrador especificado por `WriteReg` sob controle de `RegWrite`.
+Este documento descreve **com fidelidade ao RTL existente** a arquitetura do processador MIPS com pipeline implementada em `src/`, servindo de referência técnica direta para desenvolvimento, depuração, testbenches e redação do relatório IEEE.
 
 ---
 
-## 2. Registradores entre Estágios (Pipeline Registers)
+## 1. Visão Geral dos 5 Estágios (`src/mips_pipeline_top.v`)
 
-Entre cada estágio sequencial, registradores de barramento síncronos capturam dados e sinais de controle na borda de subida do clock:
+A microarquitetura segue o modelo clássico de Patterson & Hennessy com arquitetura **Harvard** (ROM de instruções e RAM de dados separadas), dividida em 5 estágios síncronos:
 
-### 2.1. Registrador IF/ID (`pipe_if_id.v`)
-- **Entradas:** `clk`, `rst`, `enable` (para stall via `IF_ID_Write`), `flush` (para descarte em branch/jump), `pc_plus_4_in`, `instr_in`.
-- **Saídas:** `pc_plus_4_out`, `instr_out`.
+1. **IF (*Instruction Fetch*):**
+   - `pc` (`src/datapath/pc.v`): registra `if_pc` (inicia em `32'd0` no `reset`), com entrada `enable` controlada por `pc_write`.
+   - `pc_adder_inst` (`src/datapath/adder.v`): calcula `if_pc_plus_4 = if_pc + 4`.
+   - `instr_mem_inst` (`src/memory/instr_mem.v`): leitura combinacional de `rom[addr[9:2]]` carregada via `$readmemb("assembly-mips/sort.bin", rom)`.
+   - Seleção de `next_pc` por prioridade:
+     1. `ex_branch_taken` → `ex_branch_target`
+     2. `ex_jr` → `ex_forward_a_data`
+     3. `id_jump_taken` (`id_jump & ~control_mux_sel`) → `id_pc_jump`
+     4. Padrão → `if_pc_plus_4`
 
-### 2.2. Registrador ID/EX (`pipe_id_ex.v`)
-- **Entradas de Controle:**
-  - WB: `RegWrite`, `MemtoReg`.
-  - MEM: `MemRead`, `MemWrite`, `Branch`, `BranchNE`.
-  - EX: `ALUSrc`, `ALUOp`, `RegDst`.
-- **Entradas de Dados:** `pc_plus_4_in`, `read_data1_in`, `read_data2_in`, `sign_ext_imm_in`, `rs_in`, `rt_in`, `rd_in`.
-- **Sinal de Controle:** `flush` (zera sinais de controle para inserir bolha em perigo load-use).
+2. **ID (*Instruction Decode / Register Read*):**
+   - Decodifica `id_instr` vinda de `pipe_if_id`.
+   - `main_control` (`src/control/main_control.v`) gera os sinais de controle a partir de `id_opcode`; `id_is_jr` desabilita `id_reg_write` quando a instrução é `jr` (`opcode == 000000` e `funct == 001000`).
+   - `hazard_detection_unit` (`src/hazard/hazard_detection_unit.v`) verifica conflito *Load-Use* com o estágio EX (`id_ex_mem_read` e `id_ex_rt != 0` coincidindo com `if_id_rs` ou `if_id_rt`). Quando ativo, zera `pc_write`, `if_id_write` e coloca `control_mux_sel = 1` (zerando os sinais de controle enviados para `pipe_id_ex` e suprimindo `id_jump_taken`).
+   - `reg_file` (`src/datapath/reg_file.v`): leitura combinacional em `id_rs`/`id_rt` e escrita síncrona em `wb_write_reg`, com **write-through interno WB → ID** em `mips_pipeline_top.v` (se `wb_reg_write && wb_write_reg != 0` coincidir com `id_rs` ou `id_rt`, repassa `wb_write_data` imediatamente).
+   - No `reset`, `reg_file` inicializa `$sp = 256`, `$a0 = 0` e `$a1 = 5` (bootloader bare-metal para o benchmark `sort.bin`).
+   - `sign_extend` (`src/datapath/sign_extend.v`) estende `id_imm16` para 32 bits.
+   - Calcula `id_pc_jump = {id_pc_plus_4[31:28], id_target, 2'b00}` para `j` e `jal`.
 
-### 2.3. Registrador EX/MEM (`pipe_ex_mem.v`)
-- **Entradas de Controle:** WB (`RegWrite`, `MemtoReg`), MEM (`MemRead`, `MemWrite`, `Branch`, `BranchNE`).
-- **Entradas de Dados:** `branch_target_in`, `zero_in`, `alu_result_in`, `write_data_in`, `write_reg_in`.
+3. **EX (*Execute / Address & Branch Resolution*):**
+   - `forwarding_unit` (`src/hazard/forwarding_unit.v`) gera `forward_a` e `forward_b`:
+     - `2'b10`: adianta `mem_alu_result` de `EX/MEM` (maior prioridade).
+     - `2'b01`: adianta `wb_write_data` de `MEM/WB`.
+     - `2'b00`: usa `ex_read_data1` / `ex_read_data2` de `ID/EX`.
+     - Protege `$0`: nunca adianta quando `write_reg == 0`.
+   - `ex_alu_src_b`: mux entre `ex_forward_b_data` e `ex_sign_ext_imm` (via `ex_alu_src`).
+   - `alu_control` (`src/control/alu_control.v`): recebe `ex_alu_op` e `funct = ex_sign_ext_imm[5:0]` e gera `ex_alu_ctrl` e `ex_jr`.
+   - `alu` (`src/datapath/alu.v`): executa `AND`, `OR`, `ADD`, `SLL`, `SUB`, `SLT`, `NOR` e gera a flag `ex_zero`.
+   - **Resolução de desvios no estágio EX:**
+     - `branch_adder_inst` calcula `ex_branch_target = ex_pc_plus_4 + (ex_sign_ext_imm << 2)`.
+     - `ex_branch_taken = (ex_branch & ex_zero) | (ex_bne & ~ex_zero)`.
+     - Quando `ex_branch_taken` ou `ex_jr` é ativo, gera `if_id_flush` e `id_ex_flush` para descartar as instruções especulativas nos estágios anteriores.
+   - Seleção do registrador destino `ex_write_reg`: `ex_rd` (`2'b01`), `$31/$ra` (`2'b10`, para `jal`) ou `ex_rt` (`default`).
 
-### 2.4. Registrador MEM/WB (`pipe_mem_wb.v`)
-- **Entradas de Controle:** WB (`RegWrite`, `MemtoReg`).
-- **Entradas de Dados:** `mem_read_data_in`, `alu_result_in`, `write_reg_in`.
+4. **MEM (*Memory Access*):**
+   - `data_mem` (`src/memory/data_mem.v`): leitura combinacional protegida por `mem_mem_read` e escrita síncrona em `posedge clk` quando `mem_mem_write == 1`, indexada por `mem_alu_result[9:2]`.
+   - Inicialização de hardware para o benchmark: `ram[0..4] = {88, 15, 42, 7, 99}`.
 
----
-
-## 3. Tratamento de Riscos (Hazards)
-
-### 3.1. Riscos de Dados (RAW - Read After Write) & Forwarding Unit
-Ocorre quando uma instrução precisa do resultado de uma instrução anterior que ainda não atingiu o estágio WB:
-- **Encaminhamento EX/MEM para EX:**
-  - Se `EX/MEM.RegWrite` ativo e `EX/MEM.WriteReg != 0` e `EX/MEM.WriteReg == ID/EX.rs` -> Encaminha `EX/MEM.ALUResult` para entrada A da ULA.
-  - Se `EX/MEM.RegWrite` ativo e `EX/MEM.WriteReg != 0` e `EX/MEM.WriteReg == ID/EX.rt` -> Encaminha `EX/MEM.ALUResult` para entrada B da ULA.
-- **Encaminhamento MEM/WB para EX:**
-  - Se `MEM/WB.RegWrite` ativo e `MEM/WB.WriteReg != 0` e não satisfeito pelo encaminhamento anterior e `MEM/WB.WriteReg == ID/EX.rs` -> Encaminha dado de WB para entrada A da ULA.
-  - Se `MEM/WB.RegWrite` ativo e `MEM/WB.WriteReg != 0` e não satisfeito pelo encaminhamento anterior e `MEM/WB.WriteReg == ID/EX.rt` -> Encaminha dado de WB para entrada B da ULA.
-
-### 3.2. Risco de Dados com Carga (Load-Use Hazard) & Hazard Detection Unit
-Ocorre quando uma instrução logo após um `lw` necessita do dado lido da memória. Como o dado só está disponível ao final do estágio MEM, é necessária a inserção de **1 ciclo de stall (bolha)**:
-- **Condição de Detecção:**
-  ```verilog
-  if (ID_EX_MemRead && ((ID_EX_rt == IF_ID_rs) || (ID_EX_rt == IF_ID_rt))) begin
-      // Stall
-      PC_Write = 1'b0;        // Congela PC
-      IF_ID_Write = 1'b0;     // Congela registrador IF/ID
-      Control_Mux_Sel = 1'b1; // Zera sinais de controle enviados a ID/EX (insere NOP)
-  end
-  ```
-
-### 3.3. Riscos de Controle (Branches e Jumps)
-- **Branch (Desvio Condicional):** Quando o desvio é tomado (`PCSrc = 1`), a instrução buscada especulativamente deve ser descartada gerando sinal de `flush` no registrador `IF/ID`.
-- **Jump / JAL / JR (Salto Incondicional):** O salto altera o fluxo no estágio ID/EX; instruções já carregadas no estágio IF devem sofrer `flush`.
+5. **WB (*Write Back*):**
+   - Seleciona `wb_write_data` via `wb_mem_to_reg`:
+     - `2'b01`: `wb_read_data` (`lw`)
+     - `2'b10`: `wb_pc_plus_4` (`jal`)
+     - `default` (`2'b00`): `wb_alu_result` (Tipo-R, `addi`, `slti`)
+   - Escreve em `reg_file` na borda de subida do clock se `wb_reg_write == 1` e `wb_write_reg != 0`.
 
 ---
 
-## 4. Conjunto de Instruções Alvo
+## 2. Registradores de Pipeline (`src/pipeline/`)
 
-O caminho de dados com pipeline suporta integralmente as instruções necessárias para o algoritmo do benchmark:
-
-| Categoria | Instruções Suportadas |
-|---|---|
-| **Tipo R** | `add`, `sub`, `and`, `or`, `slt`, `xor`, `nor`, `jr` |
-| **Tipo I (Memória)** | `lw`, `sw` |
-| **Tipo I (Imediatos)** | `addi`, `andi`, `ori`, `slti` |
-| **Tipo I (Desvios)** | `beq`, `bne` |
-| **Tipo J (Saltos)** | `j`, `jal` |
+Todos possuem `clk`, `rst` (assíncrono ativo alto), `enable` e `flush` (síncrono prioritário sobre `enable`):
+* **`pipe_if_id.v`**: `pc_plus_4`, `instr`.
+* **`pipe_id_ex.v`**: controles EX (`reg_dst`, `alu_op`, `alu_src`), MEM (`branch`, `bne`, `mem_read`, `mem_write`), WB (`reg_write`, `mem_to_reg`) + dados (`pc_plus_4`, `read_data1`, `read_data2`, `sign_ext_imm`, `shamt`, `rs`, `rt`, `rd`).
+* **`pipe_ex_mem.v`**: controles MEM/WB + dados (`pc_plus_4`, `branch_target`, `zero`, `alu_result`, `write_data`, `write_reg`).
+* **`pipe_mem_wb.v`**: controles WB + dados (`pc_plus_4`, `mem_read_data`, `alu_result`, `write_reg`).
 
 ---
 
-## 5. Mapeamento dos Registradores do Benchmark (Bubble Sort)
+## 3. Conjunto de Instruções Suportadas (16 Instruções)
 
-- `$a0` (`$4`): Endereço base do vetor `v`
-- `$a1` (`$5`): Tamanho `n` ou argumento `k`
-- `$s0` (`$16`): Índice do laço externo `i`
-- `$s1` (`$17`): Índice do laço interno `j`
-- `$sp` (`$29`): Ponteiro da pilha (inicializado em `0x000000FF` ou conforme o mapeamento)
-- `$ra` (`$31`): Endereço de retorno de sub-rotina (`swap`)
+O hardware implementa exatamente as **16 instruções** necessárias ao MIPS clássico e ao algoritmo *Bubble Sort* (`assembly-mips/sort.s`):
+
+| Categoria | Instruções | Observações |
+|---|---|---|
+| **Tipo R (ALU / Shift)** | `add`, `sub`, `and`, `or`, `slt`, `nor`, `sll` | `nop` = `0x00000000` (`sll $0, $0, 0`) |
+| **Tipo R (Salto)** | `jr` | Desvio para registrador `rs`; suprime `reg_write` |
+| **Tipo I (Memória)** | `lw`, `sw` | Endereçamento por palavra via `addr[9:2]` |
+| **Tipo I (Imediatos)** | `addi`, `slti` | Imediato com extensão de sinal (`sign_extend`) |
+| **Tipo I (Desvios)** | `beq`, `bne` | Resolvidos no estágio EX |
+| **Tipo J (Saltos)** | `j`, `jal` | Alvo calculado em ID; `jal` grava `PC+4` em `$31` (`$ra`) |
+
+*(Nota: o projeto **não** inclui nem requer instruções fora dessa lista, como `xor`, `andi` ou `ori`.)*
+
+---
+
+## 4. Mapeamento dos Registradores no Benchmark (`sort.s`)
+
+* `$a0` (`$4`): endereço base do vetor `v` (`0`)
+* `$a1` (`$5`): tamanho do vetor `n` (`5`) ou argumento `k`
+* `$s0` (`$16`): índice externo `i`
+* `$s1` (`$17`): índice interno `j`
+* `$sp` (`$29`): ponteiro de pilha (inicia em `256`)
+* `$ra` (`$31`): endereço de retorno de sub-rotina (`swap`)
