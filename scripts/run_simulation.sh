@@ -10,7 +10,7 @@ BLUE="\033[0;34m"
 RESET="\033[0m"
 
 TARGET="${1:-}"
-VALID_TARGETS="alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | pipe_id_ex | pipe_ex_mem | pipe_mem_wb | forwarding_unit | hazard_detection_unit | pipeline_top | pipeline_isa_hazards"
+VALID_TARGETS="alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | pipe_id_ex | pipe_ex_mem | pipe_mem_wb | forwarding_unit | hazard_detection_unit | pipeline_top | pipeline_isa_hazards | benchmark"
 
 if [[ -z "${TARGET}" ]]; then
     echo -e "${RED}[ERRO]${RESET} Alvo de simulação não especificado."
@@ -85,7 +85,7 @@ case "${TARGET}" in
         SRC_FILES=("src/hazard/hazard_detection_unit.v")
         TB_FILE="tb/tb_hazard_detection_unit.v"
         ;;
-    pipeline_top|mips_pipeline_top|pipeline_isa_hazards)
+    pipeline_top|mips_pipeline_top|pipeline_isa_hazards|benchmark)
         SRC_FILES=(
             "src/datapath/pc.v"
             "src/datapath/adder.v"
@@ -110,6 +110,12 @@ case "${TARGET}" in
         )
         if [[ "${TARGET}" == "pipeline_isa_hazards" ]]; then
             TB_FILE="tb/tb_pipeline_isa_hazards.v"
+        elif [[ "${TARGET}" == "benchmark" ]]; then
+            SRC_FILES+=(
+                "monociclo/src/datapath_monociclo.v"
+                "monociclo/src/mips_monociclo_top.v"
+            )
+            TB_FILE="tb/tb_benchmark_comparativo.v"
         else
             TARGET="mips_pipeline_top"
             OUT_VVP="${BUILD_DIR}/mips_pipeline_top.vvp"
