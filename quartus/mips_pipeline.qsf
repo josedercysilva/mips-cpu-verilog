@@ -35,6 +35,7 @@ set_global_assignment -name VERILOG_INPUT_VERSION VERILOG_2001
 set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
 
 # Arquivos de Codigo-Fonte HDL (Caminhos Relativos ao diretorio quartus/)
+set_global_assignment -name SDC_FILE mips_pipeline.sdc
 set_global_assignment -name VERILOG_FILE ../src/control/alu_control.v
 set_global_assignment -name VERILOG_FILE ../src/control/control_unit.v
 set_global_assignment -name VERILOG_FILE ../src/control/main_control.v

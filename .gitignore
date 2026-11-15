@@ -16,6 +16,7 @@ quartus/incremental_db/
 quartus/output_files/
 quartus/simulation/
 quartus/assembly-mips/
+monociclo/quartus/assembly-mips/
 db/
 incremental_db/
 output_files/
@@ -57,6 +58,7 @@ Thumbs.db
 
 # --- Scripts Python Temporários / Testes ---
 scripts/*.py
+!scripts/quartus_metrics.py
 __pycache__/
 *.py[cod]
 

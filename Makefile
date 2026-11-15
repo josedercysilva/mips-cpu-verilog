@@ -3,7 +3,7 @@ SHELL := /usr/bin/env bash
 QUARTUS_BIN_DIR ?= /home/jdercy/01-dev/programas/opt_intel/quartus/bin
 export PATH := $(QUARTUS_BIN_DIR):$(PATH)
 
-.PHONY: all help test alu datapath_aux reg_file control instr_mem data_mem pipe_if_id pipe_id_ex pipe_ex_mem pipe_mem_wb forwarding_unit hazard_detection_unit pipeline_top pipeline_isa_hazards waves waves-alu waves-pipeline relatorio apresentacao quartus quartus-build quartus-pgm clean
+.PHONY: all help test alu datapath_aux reg_file control instr_mem data_mem pipe_if_id pipe_id_ex pipe_ex_mem pipe_mem_wb forwarding_unit hazard_detection_unit pipeline_top pipeline_isa_hazards waves waves-alu waves-pipeline relatorio apresentacao quartus quartus-build quartus-build-monociclo quartus-sta quartus-metrics quartus-pgm clean
 
 all: pipeline_top
 
@@ -25,7 +25,10 @@ help:
 	@echo "  make pipeline_isa_hazards - Executa a suíte integrada teste_isa.bin + teste_hazards.bin"
 	@echo "  make test          - Executa toda a bateria de testes de regressão do Pipeline"
 	@echo "  make quartus       - Executa Análise e Elaboração rápida no Intel Quartus Prime"
-	@echo "  make quartus-build - Compilação Completa (Síntese + Fitter + Geração do Bitstream .sof)"
+	@echo "  make quartus-build - Compilação Completa do Pipeline (Síntese + Fitter + Bitstream + Timing STA)"
+	@echo "  make quartus-build-monociclo - Compilação Completa do baseline Monociclo no Quartus"
+	@echo "  make quartus-sta   - Executa somente o Timing Analyzer (Fmax / Slack)"
+	@echo "  make quartus-metrics - Sintetiza Pipeline + Monociclo (se desatualizados) e gera métricas comparativas"
 	@echo "  make quartus-pgm   - Grava o bitstream (.sof) na placa DE10-Lite via USB-Blaster"
 	@echo "  make waves         - Abre as formas de onda do MIPS Pipeline no GTKWave"
 	@echo "  make waves-alu     - Abre as formas de onda da ALU no GTKWave"
@@ -79,22 +82,37 @@ pipeline_isa_hazards:
 test:
 	@./scripts/run_all_tests.sh
 
+PIPELINE_SYNTH_DEPS  := $(wildcard src/*.v src/*/*.v) quartus/mips_pipeline.qsf quartus/mips_pipeline.sdc assembly-mips/sort.bin
+MONOCICLO_SYNTH_DEPS := $(wildcard monociclo/src/*.v src/control/*.v src/datapath/*.v src/memory/*.v) monociclo/quartus/mips_monociclo.qsf monociclo/quartus/mips_monociclo.sdc assembly-mips/sort.bin
+
+quartus/output_files/mips_pipeline.sta.rpt: $(PIPELINE_SYNTH_DEPS)
+	@./scripts/run_quartus_flow.sh quartus mips_pipeline
+
+monociclo/quartus/output_files/mips_monociclo.sta.rpt: $(MONOCICLO_SYNTH_DEPS)
+	@./scripts/run_quartus_flow.sh monociclo/quartus mips_monociclo
+
 quartus:
 	@echo "Executando Análise e Elaboração no Intel Quartus Prime..."
 	@mkdir -p quartus/assembly-mips
 	@cp assembly-mips/sort.bin quartus/assembly-mips/
 	@cd quartus && quartus_map mips_pipeline --analysis_and_elaboration
+	@python3 scripts/quartus_metrics.py --project pipeline
 
 quartus-build:
-	@echo "==> [1/3] Análise e Síntese (quartus_map)..."
-	@mkdir -p quartus/assembly-mips
-	@cp assembly-mips/sort.bin quartus/assembly-mips/
-	@cd quartus && quartus_map mips_pipeline
-	@echo "==> [2/3] Mapeamento e Roteamento (quartus_fit)..."
-	@cd quartus && quartus_fit mips_pipeline
-	@echo "==> [3/3] Geração do Bitstream .sof (quartus_asm)..."
-	@cd quartus && quartus_asm mips_pipeline
-	@echo "[OK] Bitstream gerado com sucesso em quartus/output_files/mips_pipeline.sof"
+	@./scripts/run_quartus_flow.sh quartus mips_pipeline
+	@python3 scripts/quartus_metrics.py --markdown build/quartus_metrics.md --latex build/quartus_metrics.tex
+
+quartus-build-monociclo:
+	@./scripts/run_quartus_flow.sh monociclo/quartus mips_monociclo
+
+quartus-sta:
+	@echo "Executando Timing Analyzer (quartus_sta)..."
+	@cd quartus && quartus_sta mips_pipeline
+	@python3 scripts/quartus_metrics.py
+
+quartus-metrics: quartus/output_files/mips_pipeline.sta.rpt monociclo/quartus/output_files/mips_monociclo.sta.rpt
+	@mkdir -p build
+	@python3 scripts/quartus_metrics.py --markdown build/quartus_metrics.md --latex build/quartus_metrics.tex
 
 quartus-pgm:
 	@echo "Verificando conexão JTAG com a placa DE10-Lite..."
