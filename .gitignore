@@ -1,5 +1,5 @@
 # ==============================================================================
-# .gitignore - Projeto MIPS Monociclo (Entrega 02)
+# .gitignore - Projeto MIPS Pipeline (Entrega 03)
 # ==============================================================================
 
 # --- Simulação RTL (Icarus Verilog & GTKWave) ---
@@ -15,6 +15,8 @@ quartus/db/
 quartus/incremental_db/
 quartus/output_files/
 quartus/simulation/
+quartus/assembly-mips/
+monociclo/quartus/assembly-mips/
 db/
 incremental_db/
 output_files/
@@ -52,9 +54,11 @@ Thumbs.db
 *.swo
 .vscode/
 .idea/
+.kateconfig
 
 # --- Scripts Python Temporários / Testes ---
 scripts/*.py
+!scripts/quartus_metrics.py
 __pycache__/
 *.py[cod]
 

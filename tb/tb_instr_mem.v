@@ -3,8 +3,8 @@
 // Faculdade de Engenharia Elétrica e da Computação - FEEC
 // Disciplina: Arquitetura de Sistemas Digitais e Laboratório
 // Manaus, Amazonas, Brasil
-// Autor: José Dercy Vieira da Silva Filho <josedercysilva@gmail.com>
-// Desenvolvido com auxílio de: Google Antigravity (Google DeepMind) — Gemini 3.8 Flash
+// Autor: José Dercy Vieira da Silva Filho
+// Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
 // ----------------------------------------------------------------------------
 // Testbench: tb_instr_mem — Teste unitário da Memória de Instruções (ROM)
 // ============================================================================
@@ -33,6 +33,9 @@ module tb_instr_mem;
     );
     
     initial begin
+        $dumpfile("build/instr_mem.vcd");
+        $dumpvars(0, tb_instr_mem);
+
         $display("==========================================================");
         $display("   Iniciando Testbench da Memória de Instruções (Fase 3)  ");
         $display("==========================================================");

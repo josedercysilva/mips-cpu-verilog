@@ -10,10 +10,11 @@ BLUE="\033[0;34m"
 RESET="\033[0m"
 
 TARGET="${1:-}"
+VALID_TARGETS="alu | reg_file | control_unit | instr_mem | data_mem | datapath_aux | pipe_if_id | pipe_id_ex | pipe_ex_mem | pipe_mem_wb | forwarding_unit | hazard_detection_unit | pipeline_top | pipeline_isa_hazards | benchmark"
 
 if [[ -z "${TARGET}" ]]; then
     echo -e "${RED}[ERRO]${RESET} Alvo de simulação não especificado."
-    echo "Uso: $0 <alu | reg_file | control_unit | instr_mem | data_mem | top>"
+    echo "Uso: $0 <${VALID_TARGETS}>"
     exit 1
 fi
 
@@ -60,31 +61,70 @@ case "${TARGET}" in
         SRC_FILES=("src/memory/data_mem.v")
         TB_FILE="tb/tb_data_mem.v"
         ;;
-    top|mips_monociclo_top)
-        TARGET="mips_monociclo_top"
-        OUT_VVP="${BUILD_DIR}/mips_monociclo_top.vvp"
+    pipe_if_id)
+        SRC_FILES=("src/pipeline/pipe_if_id.v")
+        TB_FILE="tb/tb_pipe_if_id.v"
+        ;;
+    pipe_id_ex)
+        SRC_FILES=("src/pipeline/pipe_id_ex.v")
+        TB_FILE="tb/tb_pipe_id_ex.v"
+        ;;
+    pipe_ex_mem)
+        SRC_FILES=("src/pipeline/pipe_ex_mem.v")
+        TB_FILE="tb/tb_pipe_ex_mem.v"
+        ;;
+    pipe_mem_wb)
+        SRC_FILES=("src/pipeline/pipe_mem_wb.v")
+        TB_FILE="tb/tb_pipe_mem_wb.v"
+        ;;
+    forwarding_unit)
+        SRC_FILES=("src/hazard/forwarding_unit.v")
+        TB_FILE="tb/tb_forwarding_unit.v"
+        ;;
+    hazard_detection_unit)
+        SRC_FILES=("src/hazard/hazard_detection_unit.v")
+        TB_FILE="tb/tb_hazard_detection_unit.v"
+        ;;
+    pipeline_top|mips_pipeline_top|pipeline_isa_hazards|benchmark)
         SRC_FILES=(
             "src/datapath/pc.v"
             "src/datapath/adder.v"
+            "src/datapath/sign_extend.v"
             "src/datapath/mux2to1.v"
             "src/datapath/mux3to1.v"
             "src/datapath/mux4to1.v"
-            "src/datapath/sign_extend.v"
             "src/datapath/reg_file.v"
             "src/datapath/alu.v"
-            "src/datapath/datapath.v"
             "src/control/main_control.v"
             "src/control/alu_control.v"
             "src/control/control_unit.v"
             "src/memory/instr_mem.v"
             "src/memory/data_mem.v"
-            "src/mips_monociclo_top.v"
+            "src/pipeline/pipe_if_id.v"
+            "src/pipeline/pipe_id_ex.v"
+            "src/pipeline/pipe_ex_mem.v"
+            "src/pipeline/pipe_mem_wb.v"
+            "src/hazard/forwarding_unit.v"
+            "src/hazard/hazard_detection_unit.v"
+            "src/mips_pipeline_top.v"
         )
-        TB_FILE="tb/tb_mips_monociclo_top.v"
+        if [[ "${TARGET}" == "pipeline_isa_hazards" ]]; then
+            TB_FILE="tb/tb_pipeline_isa_hazards.v"
+        elif [[ "${TARGET}" == "benchmark" ]]; then
+            SRC_FILES+=(
+                "monociclo/src/datapath_monociclo.v"
+                "monociclo/src/mips_monociclo_top.v"
+            )
+            TB_FILE="tb/tb_benchmark_comparativo.v"
+        else
+            TARGET="mips_pipeline_top"
+            OUT_VVP="${BUILD_DIR}/mips_pipeline_top.vvp"
+            TB_FILE="tb/tb_mips_pipeline_top.v"
+        fi
         ;;
     *)
         echo -e "${RED}[ERRO]${RESET} Alvo '${TARGET}' desconhecido."
-        echo "Opções válidas: alu, reg_file, control_unit, instr_mem, data_mem, top"
+        echo "Opções válidas: ${VALID_TARGETS}"
         exit 1
         ;;
 esac
@@ -99,6 +139,8 @@ iverilog -g2012 -Wall \
     -I "${ROOT_DIR}/src/datapath" \
     -I "${ROOT_DIR}/src/control" \
     -I "${ROOT_DIR}/src/memory" \
+    -I "${ROOT_DIR}/src/pipeline" \
+    -I "${ROOT_DIR}/src/hazard" \
     -o "${OUT_VVP}" \
     "${SRC_FILES[@]}" "${TB_FILE}"
 

@@ -3,8 +3,8 @@
 // Faculdade de Engenharia Elétrica e da Computação - FEEC
 // Disciplina: Arquitetura de Sistemas Digitais e Laboratório
 // Manaus, Amazonas, Brasil
-// Autor: José Dercy Vieira da Silva Filho <josedercysilva@gmail.com>
-// Desenvolvido com auxílio de: Google Antigravity (Google DeepMind) — Gemini 3.8 Flash
+// Autor: José Dercy Vieira da Silva Filho
+// Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
 // ----------------------------------------------------------------------------
 // Testbench: tb_reg_file — Testes do Banco de Registradores
 // ============================================================================
@@ -51,6 +51,9 @@ module tb_reg_file;
     always #5 clk = ~clk;
     
     initial begin
+        $dumpfile("build/reg_file.vcd");
+        $dumpvars(0, tb_reg_file);
+
         // Inicialização
         clk = 0;
         reset = 1;

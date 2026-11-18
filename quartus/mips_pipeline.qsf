@@ -4,18 +4,18 @@
 # Disciplina: Arquitetura de Sistemas Digitais e Laboratorio
 # Manaus, Amazonas, Brasil
 # Autor: Jose Dercy Vieira da Silva Filho <josedercysilva@gmail.com>
-# Desenvolvido com auxilio de: Google Antigravity (Google DeepMind) — Gemini 3.8 Flash
+# Equipe: Jose Dercy Vieira da Silva Filho e Vinicius Menezes
 # ----------------------------------------------------------------------------
-# Projeto: MIPS Monociclo 32 bits — Intel Quartus Prime Settings File (.qsf)
+# Projeto: MIPS Pipeline 32 bits (5 Estagios) — Intel Quartus Prime Settings File (.qsf)
 # Placa Alvo: Terasic DE10-Lite
 # Dispositivo: Intel MAX 10 FPGA (10M50DAF484C7G)
 # ============================================================================
 
 set_global_assignment -name FAMILY "MAX 10"
 set_global_assignment -name DEVICE 10M50DAF484C7G
-set_global_assignment -name TOP_LEVEL_ENTITY mips_monociclo_top
+set_global_assignment -name TOP_LEVEL_ENTITY mips_pipeline_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 19.1.0
-set_global_assignment -name PROJECT_CREATION_TIME_DATE "22:15:00  SEPTEMBER 27, 2026"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "22:50:00  NOVEMBER 11, 2026"
 set_global_assignment -name LAST_QUARTUS_VERSION "19.1.0 Lite Edition"
 set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
@@ -34,26 +34,33 @@ set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name VERILOG_INPUT_VERSION VERILOG_2001
 set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
 
-# Arquivos de Codigo-Fonte HDL (Caminho Relativo ao diretorio quartus/)
+# Arquivos de Codigo-Fonte HDL (Caminhos Relativos ao diretorio quartus/)
+set_global_assignment -name SDC_FILE mips_pipeline.sdc
 set_global_assignment -name VERILOG_FILE ../src/control/alu_control.v
 set_global_assignment -name VERILOG_FILE ../src/control/control_unit.v
 set_global_assignment -name VERILOG_FILE ../src/control/main_control.v
 set_global_assignment -name VERILOG_FILE ../src/datapath/adder.v
 set_global_assignment -name VERILOG_FILE ../src/datapath/alu.v
-set_global_assignment -name VERILOG_FILE ../src/datapath/datapath.v
 set_global_assignment -name VERILOG_FILE ../src/datapath/mux2to1.v
 set_global_assignment -name VERILOG_FILE ../src/datapath/mux3to1.v
 set_global_assignment -name VERILOG_FILE ../src/datapath/mux4to1.v
 set_global_assignment -name VERILOG_FILE ../src/datapath/pc.v
 set_global_assignment -name VERILOG_FILE ../src/datapath/reg_file.v
 set_global_assignment -name VERILOG_FILE ../src/datapath/sign_extend.v
+set_global_assignment -name VERILOG_FILE ../src/hazard/forwarding_unit.v
+set_global_assignment -name VERILOG_FILE ../src/hazard/hazard_detection_unit.v
+set_global_assignment -name VERILOG_FILE ../src/pipeline/pipe_if_id.v
+set_global_assignment -name VERILOG_FILE ../src/pipeline/pipe_id_ex.v
+set_global_assignment -name VERILOG_FILE ../src/pipeline/pipe_ex_mem.v
+set_global_assignment -name VERILOG_FILE ../src/pipeline/pipe_mem_wb.v
 set_global_assignment -name VERILOG_FILE ../src/memory/data_mem.v
 set_global_assignment -name VERILOG_FILE ../src/memory/instr_mem.v
-set_global_assignment -name VERILOG_FILE ../src/mips_monociclo_top.v
+set_global_assignment -name VERILOG_FILE ../src/mips_pipeline_top.v
 
 # Definicoes da Particao Top-Level
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+
 
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

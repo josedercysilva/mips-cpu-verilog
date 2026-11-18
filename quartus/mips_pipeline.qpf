@@ -1,0 +1,17 @@
+# ============================================================================
+# Universidade Federal do Amazonas - UFAM
+# Faculdade de Engenharia Eletrica e da Computacao - FEEC
+# Disciplina: Arquitetura de Sistemas Digitais e Laboratorio
+# Manaus, Amazonas, Brasil
+# Autor: Jose Dercy Vieira da Silva Filho <josedercysilva@gmail.com>
+# Equipe: Jose Dercy Vieira da Silva Filho e Vinicius Menezes
+# ----------------------------------------------------------------------------
+# Projeto: MIPS Pipeline 32 bits — Intel Quartus Prime Project File (.qpf)
+# ============================================================================
+
+QUARTUS_VERSION = "19.1"
+DATE = "22:50:00  November 11, 2026"
+
+# Revisions
+
+PROJECT_REVISION = "mips_pipeline"

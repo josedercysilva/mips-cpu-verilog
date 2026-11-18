@@ -3,7 +3,8 @@
 // Faculdade de Engenharia Elétrica e da Computação - FEEC
 // Disciplina: Arquitetura de Sistemas Digitais e Laboratorio
 // Manaus, Amazonas, Brasil
-// Desenvolvido com auxilio de: Gemini 3.8 Flash — High
+// Autor: José Dercy Vieira da Silva Filho
+// Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
 // ----------------------------------------------------------------------------
 // Modulo: control_unit — Unidade de Controle Integrada
 // Descricao: Integra o modulo main_control e o modulo alu_control, decodificando

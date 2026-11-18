@@ -1,17 +1,17 @@
 // ============================================================================
 // Universidade Federal do Amazonas - UFAM
 // Faculdade de Engenharia Elétrica e da Computação - FEEC
-// Disciplina: Arquitetura de Sistemas Digitais e Laboratorio
+// Disciplina: Arquitetura de Sistemas Digitais e Laboratório
 // Manaus, Amazonas, Brasil
-// Autor: José Dercy Vieira da Silva Filho <josedercysilva@gmail.com>
-// Desenvolvido com auxilio de: Google Antigravity (Google DeepMind) — Gemini 3.8 Flash
+// Autor: José Dercy Vieira da Silva Filho
+// Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
 // ----------------------------------------------------------------------------
-// Modulo: datapath — Caminho de Dados Monociclo MIPS
+// Módulo: datapath_monociclo — Caminho de Dados Monociclo MIPS
 // ============================================================================
 
 `timescale 1ns / 1ps
 
-module datapath #(
+module datapath_monociclo #(
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 32
 ) (
@@ -45,6 +45,7 @@ module datapath #(
     pc #(.DATA_WIDTH(ADDR_WIDTH)) pc_inst (
         .clk(clk),
         .reset(reset),
+        .enable(1'b1),
         .pc_in(next_pc),
         .pc_out(pc_current)
     );

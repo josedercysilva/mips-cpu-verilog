@@ -3,7 +3,8 @@
 // Faculdade de Engenharia Elétrica e da Computação - FEEC
 // Disciplina: Arquitetura de Sistemas Digitais e Laboratorio
 // Manaus, Amazonas, Brasil
-// Desenvolvido com auxilio de: Gemini 3.8 Flash — High
+// Autor: José Dercy Vieira da Silva Filho
+// Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
 // ----------------------------------------------------------------------------
 // Modulo: alu_control — Controle da ALU
 // Descricao: Decodifica o sinal alu_op vindo do controle principal e o campo
@@ -15,14 +16,14 @@
 `timescale 1ns / 1ps
 
 module alu_control #(
-    parameter ALU_OP_WIDTH   = 2, // Largura do codigo alu_op
-    parameter FUNCT_WIDTH    = 6, // Largura do campo funct
-    parameter ALU_CTRL_WIDTH = 4  // Largura do sinal de controle da ALU
+    parameter ALU_OP_WIDTH   = 2, 
+    parameter FUNCT_WIDTH    = 6, 
+    parameter ALU_CTRL_WIDTH = 4  
 ) (
-    input  wire [ALU_OP_WIDTH-1:0]   alu_op,   // Codigo de operacao base do controle principal
-    input  wire [FUNCT_WIDTH-1:0]    funct,    // Campo de funcao da instrucao tipo-R — bits 5 a 0
-    output reg  [ALU_CTRL_WIDTH-1:0] alu_ctrl, // Codigo de operacao de 4 bits para a ALU
-    output reg                       jr        // 1: Instrucao JR detectada — funct = 6'b001000
+    input  wire [ALU_OP_WIDTH-1:0]   alu_op,   
+    input  wire [FUNCT_WIDTH-1:0]    funct,    
+    output reg  [ALU_CTRL_WIDTH-1:0] alu_ctrl, 
+    output reg                       jr        
 );
 
     // Codigos do campo funct (Tipo-R)

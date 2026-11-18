@@ -1,0 +1,74 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (RTL) - MIPS Pipeline Top
+[*]
+[dumpfile] "build/pipeline_top.vcd"
+[savefile] "scripts/pipeline_top.gtkw"
+[timestart] 0
+[size] 1920 1080
+[pos] -1 -1
+*-24.000000 100000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb_mips_pipeline_top.
+[treeopen] tb_mips_pipeline_top.uut.
+@28
+tb_mips_pipeline_top.clk
+tb_mips_pipeline_top.reset
+@200
+-ESTÁGIO 1: IF (Instruction Fetch)
+@22
+tb_mips_pipeline_top.uut.if_pc[31:0]
+tb_mips_pipeline_top.uut.if_instr[31:0]
+@28
+tb_mips_pipeline_top.uut.pc_write
+tb_mips_pipeline_top.uut.if_id_write
+tb_mips_pipeline_top.uut.if_id_flush
+@200
+-ESTÁGIO 2: ID (Instruction Decode)
+@22
+tb_mips_pipeline_top.uut.id_instr[31:0]
+tb_mips_pipeline_top.uut.id_rs[4:0]
+tb_mips_pipeline_top.uut.id_rt[4:0]
+tb_mips_pipeline_top.uut.id_read_data1[31:0]
+tb_mips_pipeline_top.uut.id_read_data2[31:0]
+@28
+tb_mips_pipeline_top.uut.control_mux_sel
+@200
+-ESTÁGIO 3: EX (Execute)
+@22
+tb_mips_pipeline_top.uut.ex_rs[4:0]
+tb_mips_pipeline_top.uut.ex_rt[4:0]
+@28
+tb_mips_pipeline_top.uut.forward_a[1:0]
+tb_mips_pipeline_top.uut.forward_b[1:0]
+@22
+tb_mips_pipeline_top.uut.ex_forward_a_data[31:0]
+tb_mips_pipeline_top.uut.ex_forward_b_data[31:0]
+tb_mips_pipeline_top.uut.ex_alu_result[31:0]
+@28
+tb_mips_pipeline_top.uut.ex_zero
+tb_mips_pipeline_top.uut.ex_branch_taken
+@200
+-ESTÁGIO 4: MEM (Memory Access)
+@28
+tb_mips_pipeline_top.uut.mem_mem_read
+tb_mips_pipeline_top.uut.mem_mem_write
+@22
+tb_mips_pipeline_top.uut.mem_alu_result[31:0]
+tb_mips_pipeline_top.uut.mem_write_data[31:0]
+tb_mips_pipeline_top.uut.mem_read_data[31:0]
+@200
+-ESTÁGIO 5: WB (Write Back)
+@28
+tb_mips_pipeline_top.uut.wb_reg_write
+@22
+tb_mips_pipeline_top.uut.wb_write_reg[4:0]
+tb_mips_pipeline_top.uut.wb_write_data[31:0]
+@200
+-MEMÓRIA RAM: VETOR ORDENADO
+@24
+tb_mips_pipeline_top.uut.data_mem_inst.ram[0][31:0]
+tb_mips_pipeline_top.uut.data_mem_inst.ram[1][31:0]
+tb_mips_pipeline_top.uut.data_mem_inst.ram[2][31:0]
+tb_mips_pipeline_top.uut.data_mem_inst.ram[3][31:0]
+tb_mips_pipeline_top.uut.data_mem_inst.ram[4][31:0]
+[pattern_trace] 1
+[pattern_trace] 0

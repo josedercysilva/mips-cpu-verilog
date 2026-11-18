@@ -3,8 +3,8 @@
 // Faculdade de Engenharia Elétrica e da Computação - FEEC
 // Disciplina: Arquitetura de Sistemas Digitais e Laboratório
 // Manaus, Amazonas, Brasil
-// Autor: José Dercy Vieira da Silva Filho <josedercysilva@gmail.com>
-// Desenvolvido com auxílio de: Google Antigravity (Google DeepMind) — Gemini 3.8 Flash
+// Autor: José Dercy Vieira da Silva Filho
+// Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
 // ----------------------------------------------------------------------------
 // Testbench: tb_data_mem — Teste unitário da Memória de Dados (RAM)
 // ============================================================================
@@ -43,6 +43,9 @@ module tb_data_mem;
     always #5 clk = ~clk;
     
     initial begin
+        $dumpfile("build/data_mem.vcd");
+        $dumpvars(0, tb_data_mem);
+
         clk = 0;
         mem_read = 0;
         mem_write = 0;

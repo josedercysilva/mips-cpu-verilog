@@ -1,4 +1,11 @@
 // ============================================================================
+// Universidade Federal do Amazonas - UFAM
+// Faculdade de Engenharia Elétrica e da Computação - FEEC
+// Disciplina: Arquitetura de Sistemas Digitais e Laboratório
+// Manaus, Amazonas, Brasil
+// Autor: José Dercy Vieira da Silva Filho
+// Equipe: José Dercy Vieira da Silva Filho e Vinicius Menezes
+// ----------------------------------------------------------------------------
 // Modulo: tb_control_unit — Testbench Unitario da Unidade de Controle
 // ============================================================================
 
@@ -17,6 +24,7 @@ module tb_control_unit;
     wire                      jump;
     wire                      jal;
     wire                      branch;
+    wire                      bne;
     wire                      mem_read;
     wire [1:0]                mem_to_reg;
     wire [ALU_CTRL_WIDTH-1:0] alu_ctrl;
@@ -39,6 +47,7 @@ module tb_control_unit;
         .jump(jump),
         .jal(jal),
         .branch(branch),
+        .bne(bne),
         .mem_read(mem_read),
         .mem_to_reg(mem_to_reg),
         .alu_ctrl(alu_ctrl),
@@ -53,6 +62,7 @@ module tb_control_unit;
         input         x_jump;
         input         x_jal;
         input         x_branch;
+        input         x_bne;
         input         x_mem_read;
         input [1:0]   x_mem_to_reg;
         input [3:0]   x_alu_ctrl;
@@ -65,16 +75,16 @@ module tb_control_unit;
             tests = tests + 1;
             #1;
             if (reg_dst !== x_reg_dst || jump !== x_jump || jal !== x_jal ||
-                branch !== x_branch || mem_read !== x_mem_read ||
+                branch !== x_branch || bne !== x_bne || mem_read !== x_mem_read ||
                 mem_to_reg !== x_mem_to_reg || alu_ctrl !== x_alu_ctrl ||
                 mem_write !== x_mem_write || alu_src !== x_alu_src ||
                 reg_write !== x_reg_write || jr !== x_jr) begin
 
                 $display("[FALHA] %0s", instr_name);
-                $display("  Esperado: regDst=%b j=%b jal=%b br=%b mRd=%b m2Reg=%b aluC=%b mWr=%b aSrc=%b rWr=%b jr=%b",
-                         x_reg_dst, x_jump, x_jal, x_branch, x_mem_read, x_mem_to_reg, x_alu_ctrl, x_mem_write, x_alu_src, x_reg_write, x_jr);
-                $display("  Obtido:   regDst=%b j=%b jal=%b br=%b mRd=%b m2Reg=%b aluC=%b mWr=%b aSrc=%b rWr=%b jr=%b",
-                         reg_dst, jump, jal, branch, mem_read, mem_to_reg, alu_ctrl, mem_write, alu_src, reg_write, jr);
+                $display("  Esperado: regDst=%b j=%b jal=%b br=%b bne=%b mRd=%b m2Reg=%b aluC=%b mWr=%b aSrc=%b rWr=%b jr=%b",
+                         x_reg_dst, x_jump, x_jal, x_branch, x_bne, x_mem_read, x_mem_to_reg, x_alu_ctrl, x_mem_write, x_alu_src, x_reg_write, x_jr);
+                $display("  Obtido:   regDst=%b j=%b jal=%b br=%b bne=%b mRd=%b m2Reg=%b aluC=%b mWr=%b aSrc=%b rWr=%b jr=%b",
+                         reg_dst, jump, jal, branch, bne, mem_read, mem_to_reg, alu_ctrl, mem_write, alu_src, reg_write, jr);
                 errors = errors + 1;
             end else begin
                 $display("[OK] %0s", instr_name);
@@ -90,45 +100,54 @@ module tb_control_unit;
         $display("   Iniciando Bateria de Testes: CONTROL UNIT      ");
         $display("==================================================");
 
-        //             regDst j     jal   br    mRd   m2Reg aluCtrl  mWr   aSrc  rWr   jr
+        //             regDst j     jal   br    bne   mRd   m2Reg aluCtrl  mWr   aSrc  rWr   jr
         opcode = 6'b000000; funct = 6'b100000; #9;
-        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0010, 1'b0, 1'b0, 1'b1, 1'b0, "ADD (Tipo-R)");
+        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0010, 1'b0, 1'b0, 1'b1, 1'b0, "ADD (Tipo-R)");
 
         opcode = 6'b000000; funct = 6'b100010; #9;
-        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0110, 1'b0, 1'b0, 1'b1, 1'b0, "SUB (Tipo-R)");
+        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0110, 1'b0, 1'b0, 1'b1, 1'b0, "SUB (Tipo-R)");
 
         opcode = 6'b000000; funct = 6'b100100; #9;
-        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0000, 1'b0, 1'b0, 1'b1, 1'b0, "AND (Tipo-R)");
+        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0000, 1'b0, 1'b0, 1'b1, 1'b0, "AND (Tipo-R)");
 
         opcode = 6'b000000; funct = 6'b100101; #9;
-        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0001, 1'b0, 1'b0, 1'b1, 1'b0, "OR  (Tipo-R)");
+        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0001, 1'b0, 1'b0, 1'b1, 1'b0, "OR  (Tipo-R)");
 
         opcode = 6'b000000; funct = 6'b101010; #9;
-        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0111, 1'b0, 1'b0, 1'b1, 1'b0, "SLT (Tipo-R)");
+        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0111, 1'b0, 1'b0, 1'b1, 1'b0, "SLT (Tipo-R)");
 
         opcode = 6'b000000; funct = 6'b100111; #9;
-        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b1100, 1'b0, 1'b0, 1'b1, 1'b0, "NOR (Tipo-R)");
+        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b1100, 1'b0, 1'b0, 1'b1, 1'b0, "NOR (Tipo-R)");
+
+        opcode = 6'b000000; funct = 6'b000000; #9;
+        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0011, 1'b0, 1'b0, 1'b1, 1'b0, "SLL (Tipo-R)");
 
         opcode = 6'b000000; funct = 6'b001000; #9;
-        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0000, 1'b0, 1'b0, 1'b0, 1'b1, "JR  (Tipo-R)");
+        check_signals(2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0000, 1'b0, 1'b0, 1'b0, 1'b1, "JR  (Tipo-R)");
 
         opcode = 6'b100011; funct = 6'b000000; #9;
-        check_signals(2'b00, 1'b0, 1'b0, 1'b0, 1'b1, 2'b01, 4'b0010, 1'b0, 1'b1, 1'b1, 1'b0, "LW  (Tipo-I)");
+        check_signals(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 2'b01, 4'b0010, 1'b0, 1'b1, 1'b1, 1'b0, "LW  (Tipo-I)");
 
         opcode = 6'b101011; funct = 6'b000000; #9;
-        check_signals(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0010, 1'b1, 1'b1, 1'b0, 1'b0, "SW  (Tipo-I)");
+        check_signals(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0010, 1'b1, 1'b1, 1'b0, 1'b0, "SW  (Tipo-I)");
 
         opcode = 6'b001000; funct = 6'b000000; #9;
-        check_signals(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0010, 1'b0, 1'b1, 1'b1, 1'b0, "ADDI (Tipo-I)");
+        check_signals(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0010, 1'b0, 1'b1, 1'b1, 1'b0, "ADDI (Tipo-I)");
+
+        opcode = 6'b001010; funct = 6'b000000; #9;
+        check_signals(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0111, 1'b0, 1'b1, 1'b1, 1'b0, "SLTI (Tipo-I)");
 
         opcode = 6'b000100; funct = 6'b000000; #9;
-        check_signals(2'b00, 1'b0, 1'b0, 1'b1, 1'b0, 2'b00, 4'b0110, 1'b0, 1'b0, 1'b0, 1'b0, "BEQ (Tipo-I)");
+        check_signals(2'b00, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 2'b00, 4'b0110, 1'b0, 1'b0, 1'b0, 1'b0, "BEQ (Tipo-I)");
+
+        opcode = 6'b000101; funct = 6'b000000; #9;
+        check_signals(2'b00, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 2'b00, 4'b0110, 1'b0, 1'b0, 1'b0, 1'b0, "BNE (Tipo-I)");
 
         opcode = 6'b000010; funct = 6'b000000; #9;
-        check_signals(2'b00, 1'b1, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0010, 1'b0, 1'b0, 1'b0, 1'b0, "J   (Tipo-J)");
+        check_signals(2'b00, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 2'b00, 4'b0010, 1'b0, 1'b0, 1'b0, 1'b0, "J   (Tipo-J)");
 
         opcode = 6'b000011; funct = 6'b000000; #9;
-        check_signals(2'b10, 1'b1, 1'b1, 1'b0, 1'b0, 2'b10, 4'b0010, 1'b0, 1'b0, 1'b1, 1'b0, "JAL (Tipo-J)");
+        check_signals(2'b10, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 2'b10, 4'b0010, 1'b0, 1'b0, 1'b1, 1'b0, "JAL (Tipo-J)");
 
         #10;
         $display("==================================================");
